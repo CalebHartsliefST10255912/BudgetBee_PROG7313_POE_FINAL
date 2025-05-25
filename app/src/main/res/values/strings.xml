@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">BudgetBee_PROG7313_POE_FINAL</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+
+    <string name="title_expense">Expense</string>
+    <string name="title_category">Category</string>
+    <string name="title_search">Search</string>
+    <string name="title_loan">Loan</string>
+    <string name="title_settings">Settings</string>
+
+</resources>
