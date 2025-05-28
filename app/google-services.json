@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "40787549188",
+    "project_id": "budget-bee-prog7313-poe-final",
+    "storage_bucket": "budget-bee-prog7313-poe-final.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:40787549188:android:81c0e61bffcf33194a6951",
+        "android_client_info": {
+          "package_name": "com.example.budgetbee_prog7313_poe_final"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBUOui0kEaVIZgRI7E_s5KSP-jTA8IfG5s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.example.budgetbee_prog7313_poe_final" />
+                  <option name="mobileSdkAppId" value="1:40787549188:android:81c0e61bffcf33194a6951" />
+                  <option name="projectId" value="budget-bee-prog7313-poe-final" />
+                  <option name="projectNumber" value="40787549188" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

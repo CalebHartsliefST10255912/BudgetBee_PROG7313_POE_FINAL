@@ -1,5 +1,6 @@
 package com.example.budgetbee_prog7313_poe_final.ui.home
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -7,7 +8,9 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.example.budgetbee_prog7313_poe_final.LoginActivity
 import com.example.budgetbee_prog7313_poe_final.databinding.FragmentHomeBinding
+import com.example.budgetbee_prog7313_poe_final.firebase.FirebaseAuthManager
 
 class HomeFragment : Fragment() {
 
@@ -32,6 +35,18 @@ class HomeFragment : Fragment() {
         homeViewModel.text.observe(viewLifecycleOwner) {
             textView.text = it
         }
+
+        homeViewModel.loadUserGreeting()
+
+        binding.logoutButton.setOnClickListener {
+            FirebaseAuthManager.logout()
+
+            // Navigate back to LoginActivity
+            val intent = Intent(requireContext(), LoginActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+        }
+
         return root
     }
 
