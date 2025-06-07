@@ -34,6 +34,8 @@
         <activity android:name=".ui.category.CategoryDetailsActivity" android:exported="true" />
 
 
+<!---goals-->
+        <activity android:name=".ui.GoalsActivity" />
 
 
 
