@@ -10,7 +10,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.budgetbee.*
 import com.example.budgetbee_prog7313_poe_final.R
 import com.example.budgetbee_prog7313_poe_final.firebase.FirebaseAuthManager
 import com.example.budgetbee_prog7313_poe_final.model.Category

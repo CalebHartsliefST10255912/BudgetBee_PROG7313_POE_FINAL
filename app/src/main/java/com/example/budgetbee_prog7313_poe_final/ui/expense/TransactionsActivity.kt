@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.budgetbee_prog7313_poe_final.R
 import com.example.budgetbee_prog7313_poe_final.model.Expense
 import com.google.firebase.FirebaseApp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -18,6 +19,7 @@ class TransactionActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: ExpenseAdapter
     private val firestore = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,12 +37,17 @@ class TransactionActivity : AppCompatActivity() {
     }
 
     private fun fetchExpenses() {
-        val userId = getUserId()
+        val userUid = auth.currentUser?.uid
+
+        if (userUid == null) {
+            // User not logged in
+            return
+        }
 
         lifecycleScope.launch {
             try {
                 val snapshot = firestore.collection("expenses")
-                    .whereEqualTo("userId", userId)
+                    .whereEqualTo("userUid", userUid)
                     .get()
                     .await()
 
@@ -49,13 +56,8 @@ class TransactionActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
                 e.printStackTrace()
-                // Optionally show a message to the user
+                // Optionally show a user-friendly error message here
             }
         }
-    }
-
-    private fun getUserId(): Int {
-        val prefs = getSharedPreferences("user_prefs", MODE_PRIVATE)
-        return prefs.getInt("userId", -1)
     }
 }

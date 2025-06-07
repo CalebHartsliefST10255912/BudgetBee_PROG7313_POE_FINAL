@@ -24,6 +24,19 @@
         <activity android:name=".LoginActivity" />
         <activity android:name=".RegisterActivity" />
 
+        <!-- Expenses -->
+        <activity android:name=".ui.expense.AddExpenseActivity" android:exported="true" />
+
+        <activity android:name=".ui.expense.TransactionActivity" android:exported="true" />
+
+        <!-- Category -->
+        <activity android:name=".ui.category.CategoriesActivity" android:exported="true" />
+        <activity android:name=".ui.category.CategoryDetailsActivity" android:exported="true" />
+
+
+
+
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

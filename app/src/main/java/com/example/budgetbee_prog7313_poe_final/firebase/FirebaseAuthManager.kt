@@ -29,6 +29,8 @@ object FirebaseAuthManager {
             }
     }
 
+
+
     // Get current user's UID
     fun getCurrentUserId(): String? = auth.currentUser?.uid
 
