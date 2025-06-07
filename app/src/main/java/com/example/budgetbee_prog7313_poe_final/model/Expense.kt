@@ -1,6 +1,7 @@
 package com.example.budgetbee_prog7313_poe_final.model
 
 data class Expense(
+    val expenseId: Int = 0,
     val userId: String = "",
     val categoryId: String = "",
     val name: String = "",
