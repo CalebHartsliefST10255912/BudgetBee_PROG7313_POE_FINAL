@@ -9,9 +9,9 @@
               <option name="connection">
                 <ConnectionSetting>
                   <option name="appId" value="com.example.budgetbee_prog7313_poe_final" />
-                  <option name="mobileSdkAppId" value="1:40787549188:android:81c0e61bffcf33194a6951" />
-                  <option name="projectId" value="budget-bee-prog7313-poe-final" />
-                  <option name="projectNumber" value="40787549188" />
+                  <option name="mobileSdkAppId" value="1:455926645633:android:a6c8e937536a2e301e5e80" />
+                  <option name="projectId" value="budget-bee-app-61cd1" />
+                  <option name="projectNumber" value="455926645633" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
