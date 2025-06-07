@@ -1,37 +1,36 @@
+package com.example.budgetbee_prog7313_poe_final.ui.category
+
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.budgetbee.AppDatabase
-import com.example.budgetbee.CategoryAdapter
-import com.example.budgetbee.CategoryDao
-import com.example.budgetbee.CategoryDetailsActivity
-import com.example.budgetbee.CategoryEntity
-import com.example.budgetbee.LoginActivity
-import com.example.budgetbee.R
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import com.example.budgetbee.*
+import com.example.budgetbee_prog7313_poe_final.R
+import com.example.budgetbee_prog7313_poe_final.firebase.FirebaseAuthManager
+import com.example.budgetbee_prog7313_poe_final.model.Category
+import com.google.firebase.FirebaseApp
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.*
+import kotlinx.coroutines.tasks.await
 
 class CategoryFragment : Fragment() {
 
-    private lateinit var db: AppDatabase
-    private lateinit var categoryDao: CategoryDao
+    private val firestore = FirebaseFirestore.getInstance()
     private lateinit var adapter: CategoryAdapter
     private var userId: Int = -1
+    private lateinit var recyclerView: RecyclerView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        FirebaseApp.initializeApp(requireContext())
         return inflater.inflate(R.layout.fragment_category, container, false)
     }
 
@@ -42,45 +41,48 @@ class CategoryFragment : Fragment() {
             .getInt("userId", -1)
 
         if (userId == -1) {
-            startActivity(Intent(requireContext(), LoginActivity::class.java))
+            startActivity(Intent(requireContext(), FirebaseAuthManager::class.java))
             requireActivity().finish()
             return
         }
 
-        db = AppDatabase.getDatabase(requireContext())
-        categoryDao = db.categoryDao()
-
-        val recyclerView = view.findViewById<RecyclerView>(R.id.categoryRecyclerView)
+        recyclerView = view.findViewById(R.id.categoryRecyclerView)
         recyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
 
+        loadCategories()
+    }
+
+    private fun loadCategories() {
         viewLifecycleOwner.lifecycleScope.launch {
-            val existingCategories = withContext(Dispatchers.IO) {
-                categoryDao.getAll(userId)
-            }
+            val categoriesSnapshot = firestore.collection("categories")
+                .whereEqualTo("userId", userId)
+                .get()
+                .await()
 
-            if (existingCategories.isEmpty()) {
+            val categories = categoriesSnapshot.toObjects(Category::class.java).toMutableList()
+
+            if (categories.isEmpty()) {
                 val predefined = listOf(
-                    CategoryEntity(userId = userId, name = "Food", iconResId = R.drawable.blue_circle),
-                    CategoryEntity(userId = userId, name = "Transport", iconResId = R.drawable.blue_circle),
-                    CategoryEntity(userId = userId, name = "Medicine", iconResId = R.drawable.blue_circle),
-                    CategoryEntity(userId = userId, name = "Groceries", iconResId = R.drawable.blue_circle),
-                    CategoryEntity(userId = userId, name = "Rent", iconResId = R.drawable.blue_circle),
-                    CategoryEntity(userId = userId, name = "Gifts", iconResId = R.drawable.blue_circle),
-                    CategoryEntity(userId = userId, name = "Savings", iconResId = R.drawable.blue_circle),
-                    CategoryEntity(userId = userId, name = "Entertainment", iconResId = R.drawable.blue_circle),
-                    CategoryEntity(userId = userId, name = "Add", iconResId = R.drawable.blue_circle)
+                    Category(userId = userId.toString(), name = "Food", iconResId = R.drawable.blue_circle),
+                    Category(userId = userId.toString(), name = "Transport", iconResId = R.drawable.blue_circle),
+                    Category(userId = userId.toString(), name = "Medicine", iconResId = R.drawable.blue_circle),
+                    Category(userId = userId.toString(), name = "Groceries", iconResId = R.drawable.blue_circle),
+                    Category(userId = userId.toString(), name = "Rent", iconResId = R.drawable.blue_circle),
+                    Category(userId = userId.toString(), name = "Gifts", iconResId = R.drawable.blue_circle),
+                    Category(userId = userId.toString(), name = "Savings", iconResId = R.drawable.blue_circle),
+                    Category(userId = userId.toString(), name = "Entertainment", iconResId = R.drawable.blue_circle),
+                    Category(userId = userId.toString(), name = "Add", iconResId = R.drawable.blue_circle)
                 )
-                withContext(Dispatchers.IO) {
-                    predefined.forEach { categoryDao.insert(it) }
+
+                predefined.forEach {
+                    firestore.collection("categories").add(it).await()
                 }
+
+                categories.addAll(predefined)
             }
 
-            val updatedCategories = withContext(Dispatchers.IO) {
-                categoryDao.getAll(userId)
-            }
-
-            val (moreCategory, otherCategories) = updatedCategories.partition { it.name == "Add" }
-            val orderedCategories = otherCategories + moreCategory
+            val (addCategory, otherCategories) = categories.partition { it.name == "Add" }
+            val orderedCategories = otherCategories + addCategory
 
             adapter = CategoryAdapter(orderedCategories) { selectedCategory ->
                 if (selectedCategory.name == "Add") {
@@ -88,6 +90,7 @@ class CategoryFragment : Fragment() {
                 } else {
                     val intent = Intent(requireContext(), CategoryDetailsActivity::class.java)
                     intent.putExtra("CATEGORY_NAME", selectedCategory.name)
+                    intent.putExtra("CATEGORY_ID", selectedCategory.categoryId) // Optional
                     startActivity(intent)
                 }
             }
@@ -107,16 +110,14 @@ class CategoryFragment : Fragment() {
         builder.setPositiveButton("Add") { dialog, _ ->
             val categoryName = input.text.toString().trim()
             if (categoryName.isNotEmpty()) {
-                val newCategory = CategoryEntity(
-                    userId = userId,
+                val newCategory = Category(
+                    userId = userId.toString(),
                     name = categoryName,
                     iconResId = R.drawable.blue_circle
                 )
 
                 viewLifecycleOwner.lifecycleScope.launch {
-                    withContext(Dispatchers.IO) {
-                        categoryDao.insert(newCategory)
-                    }
+                    firestore.collection("categories").add(newCategory).await()
                     refreshCategoryList()
                 }
             }
@@ -129,10 +130,17 @@ class CategoryFragment : Fragment() {
 
     private fun refreshCategoryList() {
         viewLifecycleOwner.lifecycleScope.launch {
-            val updatedCategories = withContext(Dispatchers.IO) {
-                categoryDao.getAll(userId)
-            }
-            adapter.updateCategories(updatedCategories)
+            val snapshot = firestore.collection("categories")
+                .whereEqualTo("userId", userId)
+                .get()
+                .await()
+
+            val updatedCategories = snapshot.toObjects(Category::class.java)
+
+            val (addCategory, otherCategories) = updatedCategories.partition { it.name == "Add" }
+            val orderedCategories = otherCategories + addCategory
+
+            adapter.updateCategories(orderedCategories)
         }
     }
 }

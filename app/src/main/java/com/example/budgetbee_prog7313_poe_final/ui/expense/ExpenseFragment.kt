@@ -7,6 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import androidx.fragment.app.Fragment
+import com.example.budgetbee_prog7313_poe_final.R
+import com.example.budgetbee_prog7313_poe_final.ui.expense.AddExpenseActivity
 import com.example.budgetbee_prog7313_poe_final.ui.expense.TransactionActivity
 
 class ExpenseFragment : Fragment() {
@@ -15,7 +17,7 @@ class ExpenseFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_transaction, container, false)
+        val view = inflater.inflate(R.layout.fragment_expense, container, false)
 
         val buttonAddExpense = view.findViewById<Button>(R.id.buttonAddExpense)
         val buttonViewTransactions = view.findViewById<Button>(R.id.buttonViewTransactions)

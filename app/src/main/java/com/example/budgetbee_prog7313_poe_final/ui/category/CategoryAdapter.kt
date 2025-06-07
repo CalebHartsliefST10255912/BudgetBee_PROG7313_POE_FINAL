@@ -6,11 +6,13 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.budgetbee_prog7313_poe_final.R
+import com.example.budgetbee_prog7313_poe_final.model.Category
 
 //recycler view adapter for diplaying a list of categories
 class CategoryAdapter(
-    private var categories: List<CategoryEntity>,   //list of categories
-    private val onClick: (CategoryEntity) -> Unit
+    private var categories: List<Category>,   //list of categories
+    private val onClick: (Category) -> Unit
 ) : RecyclerView.Adapter<CategoryAdapter.CategoryViewHolder>() {
 
     //Holds the view for each item
@@ -39,7 +41,7 @@ class CategoryAdapter(
     override fun getItemCount(): Int = categories.size
 
     //updates the data
-    fun updateCategories(newList: List<CategoryEntity>) {
+    fun updateCategories(newList: List<Category>) {
         categories = newList
         notifyDataSetChanged()
     }

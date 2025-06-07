@@ -8,88 +8,72 @@ import android.os.Bundle
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import com.example.budgetbee_prog7313_poe_final.R
+import com.example.budgetbee_prog7313_poe_final.model.Category
+import com.google.firebase.FirebaseApp
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import java.text.SimpleDateFormat
 import java.util.*
 
-/*
-*
-* GeeksforGeeks. (2023). Android - Image Picker From Gallery using ActivityResultContracts in Kotlin. [online] Available at: https://www.geeksforgeeks.org/android-image-picker-from-gallery-using-activityresultcontracts-in-kotlin/.
-
-‌
-*
-* Used this for helping understand how to pick images
-*
-*
-* Android Developers. (2019). SharedPreferences  |  Android Developers. [online] Available at: https://developer.android.com/reference/android/content/SharedPreferences.
-
-‌
-*
-* Used this to help make sure the user data is linked to their data
-*
-* */
-
-
 class AddExpenseActivity : AppCompatActivity() {
 
-    private lateinit var db: AppDatabase
+    private val firestore = FirebaseFirestore.getInstance()
+    private val storage = FirebaseStorage.getInstance()
+
     private var imageUri: Uri? = null
-    private val PICK_IMAGE_REQUEST = 1  //Requests code for image selection
+    private val PICK_IMAGE_REQUEST = 1
     private var categoryId = -1
     private lateinit var categoryName: String
-    private lateinit var categoriesList: List<CategoryEntity> // List to hold categories
+    private lateinit var categoriesList: List<Category>
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_expense)
 
-        //Initialize Room database instance
-        db = AppDatabase.getDatabase(this)
+        FirebaseApp.initializeApp(this)
 
-        // Get userId from shared preferences
         val userId = getSharedPreferences("user_prefs", MODE_PRIVATE).getInt("userId", -1)
         if (userId == -1) {
             Toast.makeText(this, "User not found", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // Fetch categories from the database
-        lifecycleScope.launch {
-            categoriesList = withContext(Dispatchers.IO) {
-                db.categoryDao().getCategoriesForUser(userId)
-            }
-
-            // Populate the Spinner
-            val categoryNames = categoriesList.map { it.name } // Extract category names
-            val adapter = ArrayAdapter(this@AddExpenseActivity, android.R.layout.simple_spinner_item, categoryNames)
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            findViewById<Spinner>(R.id.categorySpinner).adapter = adapter
-
-            // Set the spinner item selected listener
-            findViewById<Spinner>(R.id.categorySpinner).onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                    categoryId = categoriesList[position].categoryId
-                    categoryName = categoriesList[position].name
+        // Load categories from Firestore
+        firestore.collection("categories")
+            .whereEqualTo("userId", userId)
+            .get()
+            .addOnSuccessListener { result ->
+                categoriesList = result.documents.map {
+                    Category(
+                        categoryId = it.getLong("categoryId")?.toInt() ?: 0,
+                        name = it.getString("name") ?: ""
+                    )
                 }
 
-                override fun onNothingSelected(parent: AdapterView<*>) {
+                val categoryNames = categoriesList.map { it.name }
+                val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categoryNames)
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                findViewById<Spinner>(R.id.categorySpinner).adapter = adapter
 
-                }
+                findViewById<Spinner>(R.id.categorySpinner).onItemSelectedListener =
+                    object : AdapterView.OnItemSelectedListener {
+                        override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                            categoryId = categoriesList[position].categoryId
+                            categoryName = categoriesList[position].name
+                        }
+
+                        override fun onNothingSelected(parent: AdapterView<*>) {}
+                    }
             }
-        }
 
-        // Image picker button
         findViewById<Button>(R.id.buttonPickImage).setOnClickListener {
             val intent = Intent(Intent.ACTION_PICK)
             intent.type = "image/*"
             startActivityForResult(intent, PICK_IMAGE_REQUEST)
         }
 
-        // Add expense button
         findViewById<Button>(R.id.buttonAddExpense).setOnClickListener {
             saveExpense()
         }
@@ -103,7 +87,6 @@ class AddExpenseActivity : AppCompatActivity() {
         }
     }
 
-    //Save expense entry to Room DB
     private fun saveExpense() {
         val name = findViewById<EditText>(R.id.inputExpenseName).text.toString()
         val amount = findViewById<EditText>(R.id.inputExpenseAmount).text.toString().toDoubleOrNull() ?: 0.0
@@ -113,37 +96,49 @@ class AddExpenseActivity : AppCompatActivity() {
         val endTime = findViewById<EditText>(R.id.inputEndTime).text.toString()
 
         val date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-
         val userId = getSharedPreferences("user_prefs", MODE_PRIVATE).getInt("userId", -1)
         if (userId == -1) {
             Toast.makeText(this, "User not found", Toast.LENGTH_SHORT).show()
             return
         }
 
-        //Create expense entity
-        val expense = ExpenseEntryEntity(
-            userId = userId,
-            categoryId = categoryId,
-            name = name,
-            amount = amount,
-            date = date,
-            startTime = startTime,
-            endTime = endTime,
-            category = categoryName,
-            description = description,
-            location = location,
-            photoPath = imageUri?.toString()
+        val expenseData = hashMapOf(
+            "userId" to userId,
+            "categoryId" to categoryId,
+            "name" to name,
+            "amount" to amount,
+            "date" to date,
+            "startTime" to startTime,
+            "endTime" to endTime,
+            "category" to categoryName,
+            "description" to description,
+            "location" to location
         )
 
-        //Insert expense into DB
-        lifecycleScope.launch {
-            withContext(Dispatchers.IO) {
-                db.expenseDao().insertExpense(expense)
-            }
-            Toast.makeText(this@AddExpenseActivity, "Expense Added", Toast.LENGTH_SHORT).show()
-            finish()
+        if (imageUri != null) {
+            val fileRef = storage.reference.child("expenses/${UUID.randomUUID()}")
+            fileRef.putFile(imageUri!!)
+                .addOnSuccessListener {
+                    fileRef.downloadUrl.addOnSuccessListener { uri ->
+                        expenseData["photoPath"] = uri.toString()
+                        firestore.collection("expenses")
+                            .add(expenseData)
+                            .addOnSuccessListener {
+                                Toast.makeText(this, "Expense Added", Toast.LENGTH_SHORT).show()
+                                finish()
+                            }
+                    }
+                }
+                .addOnFailureListener {
+                    Toast.makeText(this, "Image upload failed", Toast.LENGTH_SHORT).show()
+                }
+        } else {
+            firestore.collection("expenses")
+                .add(expenseData)
+                .addOnSuccessListener {
+                    Toast.makeText(this, "Expense Added", Toast.LENGTH_SHORT).show()
+                    finish()
+                }
         }
     }
 }
-
-

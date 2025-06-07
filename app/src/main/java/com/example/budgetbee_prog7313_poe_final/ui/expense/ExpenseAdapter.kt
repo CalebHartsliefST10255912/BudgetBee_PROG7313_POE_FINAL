@@ -6,14 +6,13 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.budgetbee.R
-import com.example.budgetbee.data.ExpenseEntryEntity
 import com.example.budgetbee_prog7313_poe_final.R
+import com.example.budgetbee_prog7313_poe_final.model.Expense
 
 //This is the expense adapter, it will help with the recylerView and formating for expenses
 class ExpenseAdapter : RecyclerView.Adapter<ExpenseAdapter.ExpenseViewHolder>() {
 
-    private var expenses: List<ExpenseEntryEntity> = listOf()
+    private var expenses: List<Expense> = listOf()
 
     inner class ExpenseViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val expenseName: TextView = itemView.findViewById(R.id.textExpenseName)
@@ -36,7 +35,7 @@ class ExpenseAdapter : RecyclerView.Adapter<ExpenseAdapter.ExpenseViewHolder>() 
 
     override fun getItemCount(): Int = expenses.size
 
-    fun submitList(list: List<ExpenseEntryEntity>) {
+    fun submitList(list: List<Expense>) {
         expenses = list
         notifyDataSetChanged()
     }
