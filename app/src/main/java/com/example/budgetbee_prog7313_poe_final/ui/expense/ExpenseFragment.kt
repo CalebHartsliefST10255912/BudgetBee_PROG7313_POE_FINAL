@@ -1,4 +1,4 @@
-package com.example.budgetbee
+package com.example.budgetbee_prog7313_poe_final.ui.expense
 
 import android.content.Intent
 import android.os.Bundle
@@ -8,8 +8,6 @@ import android.view.ViewGroup
 import android.widget.Button
 import androidx.fragment.app.Fragment
 import com.example.budgetbee_prog7313_poe_final.R
-import com.example.budgetbee_prog7313_poe_final.ui.expense.AddExpenseActivity
-import com.example.budgetbee_prog7313_poe_final.ui.expense.TransactionActivity
 
 class ExpenseFragment : Fragment() {
 
