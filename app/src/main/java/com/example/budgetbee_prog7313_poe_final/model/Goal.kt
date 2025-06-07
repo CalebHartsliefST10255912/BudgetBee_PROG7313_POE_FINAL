@@ -1,7 +1,8 @@
 package com.example.budgetbee_prog7313_poe_final.model
 
 data class Goal(
-    val minMonthlyGoal: Double = 0.0,
-    val maxMonthlyGoal: Double = 0.0,
-    val otherGoal: String = ""
+    val userId: String = "",
+    val minGoal: Double = 0.0,
+    val maxGoal: Double = 0.0,
+    val month: String = ""  // Format: "June 2025" or "2025-06"
 )

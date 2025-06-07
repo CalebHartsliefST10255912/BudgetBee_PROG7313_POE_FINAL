@@ -47,5 +47,13 @@ class LoginActivity : AppCompatActivity() {
         goToRegisterBtn.setOnClickListener {
             startActivity(Intent(this, RegisterActivity::class.java))
         }
+        val skipToHomeBtn = findViewById<Button>(R.id.btnSkipToHome)
+
+        skipToHomeBtn.setOnClickListener {
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+        }
+
     }
+
 }
