@@ -1,39 +1,33 @@
 package com.example.budgetbee_prog7313_poe_final.ui.expense
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
+import android.widget.Button
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
-import com.example.budgetbee_prog7313_poe_final.databinding.FragmentExpenseBinding
+import com.example.budgetbee_prog7313_poe_final.R
 
 class ExpenseFragment : Fragment() {
 
-    private var _binding: FragmentExpenseBinding? = null
-    private val binding get() = _binding!!
-
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
+        inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        val expenseViewModel =
-            ViewModelProvider(this).get(ExpenseViewModel::class.java)
+    ): View? {
+        val view = inflater.inflate(R.layout.fragment_expense, container, false)
 
-        _binding = FragmentExpenseBinding.inflate(inflater, container, false)
-        val root: View = binding.root
+        val buttonAddExpense = view.findViewById<Button>(R.id.buttonAddExpense)
+        val buttonViewTransactions = view.findViewById<Button>(R.id.buttonViewTransactions)
 
-        val textView: TextView = binding.textExpense
-        expenseViewModel.text.observe(viewLifecycleOwner) {
-            textView.text = it
+        buttonAddExpense.setOnClickListener {
+            startActivity(Intent(requireContext(), AddExpenseActivity::class.java))
         }
-        return root
-    }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+        buttonViewTransactions.setOnClickListener {
+            startActivity(Intent(requireContext(), TransactionActivity::class.java))
+        }
+
+        return view
     }
 }
