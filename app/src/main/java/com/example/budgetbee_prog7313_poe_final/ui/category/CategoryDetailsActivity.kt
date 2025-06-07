@@ -2,98 +2,93 @@ package com.example.budgetbee_prog7313_poe_final.ui.category
 
 import ExpenseAdapter
 import android.os.Bundle
-import android.util.Log
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.budgetbee_prog7313_poe_final.R
 import com.example.budgetbee_prog7313_poe_final.model.Expense
-import com.google.firebase.FirebaseApp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.QuerySnapshot
-import kotlinx.coroutines.*
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 class CategoryDetailsActivity : AppCompatActivity() {
 
     private val firestore = FirebaseFirestore.getInstance()
-    private lateinit var adapter: ExpenseAdapter
-    private var categoryId: Int = -1
-    private var categoryName: String = ""
+    private var userUid: String? = null
+
+    private lateinit var textCategoryTitle: TextView
+    private lateinit var textTotalBalance: TextView
+    private lateinit var textTotalExpense: TextView
+    private lateinit var expenseProgress: ProgressBar
+    private lateinit var textProgressSummary: TextView
+    private lateinit var recyclerExpenses: RecyclerView
+
+    private lateinit var expenseAdapter: ExpenseAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(com.example.budgetbee_prog7313_poe_final.R.layout.activity_category_details)
+        setContentView(R.layout.activity_category_details)
 
-        FirebaseApp.initializeApp(this)
+        userUid = FirebaseAuth.getInstance().currentUser?.uid
 
-        categoryId = intent.getIntExtra("CATEGORY_ID", -1)
-        categoryName = intent.getStringExtra("CATEGORY_NAME") ?: "Category"
-
-        findViewById<TextView>(R.id.textCategoryTitle).text = categoryName
-
-        adapter = ExpenseAdapter()
-        findViewById<RecyclerView>(R.id.recyclerExpenses).apply {
-            layoutManager = LinearLayoutManager(this@CategoryDetailsActivity)
-            adapter = this@CategoryDetailsActivity.adapter
-        }
-
-        loadExpenses()
-    }
-
-    private fun loadExpenses() {
-        val prefs = getSharedPreferences("user_prefs", MODE_PRIVATE)
-        val userId = prefs.getInt("userId", -1)
-        if (userId == -1) {
-            Log.e("CategoryDetails", "User ID not found in SharedPreferences.")
+        if (userUid == null) {
+            Toast.makeText(this, "User not logged in", Toast.LENGTH_SHORT).show()
+            finish()
             return
         }
 
-        CoroutineScope(Dispatchers.Main).launch {
+        textCategoryTitle = findViewById(R.id.textCategoryTitle)
+        textTotalBalance = findViewById(R.id.textTotalBalance)
+        textTotalExpense = findViewById(R.id.textTotalExpense)
+        expenseProgress = findViewById(R.id.expenseProgress)
+        textProgressSummary = findViewById(R.id.textProgressSummary)
+        recyclerExpenses = findViewById(R.id.recyclerExpenses)
+
+        recyclerExpenses.layoutManager = LinearLayoutManager(this)
+        expenseAdapter = ExpenseAdapter()       // Initialize with no arguments
+        recyclerExpenses.adapter = expenseAdapter
+
+        val categoryName = intent.getStringExtra("CATEGORY_NAME") ?: ""
+        textCategoryTitle.text = categoryName
+
+        loadExpenses(categoryName)
+    }
+
+    private fun loadExpenses(categoryName: String) {
+        lifecycleScope.launch {
             try {
-                // Fetch expenses for category
-                val expenseSnapshot = firestore.collection("expenses")
-                    .whereEqualTo("userId", userId)
-                    .whereEqualTo("categoryId", categoryId)
+                val expensesSnapshot = firestore.collection("expenses")
+                    .whereEqualTo("userUid", userUid)
+                    .whereEqualTo("category", categoryName)
                     .get()
                     .await()
 
-                val expenses = expenseSnapshot.documents.mapNotNull { doc ->
-                    doc.toObject(Expense::class.java)
-                }
+                val expenses = expensesSnapshot.toObjects(Expense::class.java)
 
-                adapter.submitList(expenses)
+                // Calculate totals
+                val totalExpense = expenses.filter { it.amount < 0 }.sumOf { it.amount }
+                val totalIncome = expenses.filter { it.amount > 0 }.sumOf { it.amount }
+                val totalBalance = totalIncome + totalExpense
 
-                val totalExpense = expenses.sumOf { it.amount }
+                textTotalBalance.text = String.format("R%.2f", totalBalance)
+                textTotalExpense.text = String.format("-R%.2f", -totalExpense) // expenses negative, show positive
 
-                findViewById<TextView>(R.id.textTotalExpense).text =
-                    "Total Spent: R %.2f".format(totalExpense)
+                // Progress bar example (expense percentage)
+                val maxBudget = 1000.0 // example budget
+                val progressPercent = ((-totalExpense / maxBudget) * 100).toInt().coerceIn(0, 100)
+                expenseProgress.progress = progressPercent
+                textProgressSummary.text = "$progressPercent% of your budget. ${if (progressPercent > 80) "Careful!" else "Looks good."}"
 
-                // Fetch user goal
-                val goalSnapshot = firestore.collection("goals")
-                    .whereEqualTo("userId", userId)
-                    .get()
-                    .await()
+                // Update RecyclerView using submitList()
+                expenseAdapter.submitList(expenses)
 
-                if (!goalSnapshot.isEmpty) {
-                    val goal = goalSnapshot.documents[0].getDouble("maxMonthlyGoal") ?: 0.0
-                    val remaining = (goal - totalExpense).coerceAtLeast(0.0)
-                    val percentage = ((totalExpense / goal) * 100).toInt().coerceAtMost(100)
-
-                    findViewById<TextView>(R.id.textTotalBalance).text =
-                        "R %.2f".format(remaining)
-
-                    findViewById<ProgressBar>(R.id.expenseProgress)?.progress = percentage
-                    findViewById<TextView>(R.id.textProgressSummary)?.text =
-                        "$percentage% of your goal budget used."
-                } else {
-                    findViewById<TextView>(R.id.textProgressSummary)?.text =
-                        "Set a goal to track your spending."
-                }
             } catch (e: Exception) {
-                Log.e("CategoryDetails", "Error loading data", e)
+                Toast.makeText(this@CategoryDetailsActivity, "Failed to load expenses", Toast.LENGTH_SHORT).show()
             }
         }
     }

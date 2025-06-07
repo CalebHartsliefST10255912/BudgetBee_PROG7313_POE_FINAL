@@ -5,25 +5,25 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.*
 import android.widget.EditText
-import androidx.appcompat.app.AppCompatActivity
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.budgetbee_prog7313_poe_final.R
-import com.example.budgetbee_prog7313_poe_final.firebase.FirebaseAuthManager
 import com.example.budgetbee_prog7313_poe_final.model.Category
 import com.google.firebase.FirebaseApp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.*
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 class CategoryFragment : Fragment() {
 
     private val firestore = FirebaseFirestore.getInstance()
     private lateinit var adapter: CategoryAdapter
-    private var userId: Int = -1
     private lateinit var recyclerView: RecyclerView
+    private var userUid: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -36,14 +36,14 @@ class CategoryFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        userId = requireContext().getSharedPreferences("user_prefs", AppCompatActivity.MODE_PRIVATE)
-            .getInt("userId", -1)
-
-        if (userId == -1) {
-            startActivity(Intent(requireContext(), FirebaseAuthManager::class.java))
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser == null) {
+            Toast.makeText(requireContext(), "User not logged in", Toast.LENGTH_SHORT).show()
             requireActivity().finish()
             return
         }
+
+        userUid = currentUser.uid
 
         recyclerView = view.findViewById(R.id.categoryRecyclerView)
         recyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
@@ -54,7 +54,7 @@ class CategoryFragment : Fragment() {
     private fun loadCategories() {
         viewLifecycleOwner.lifecycleScope.launch {
             val categoriesSnapshot = firestore.collection("categories")
-                .whereEqualTo("userId", userId)
+                .whereEqualTo("userUid", userUid)
                 .get()
                 .await()
 
@@ -62,15 +62,15 @@ class CategoryFragment : Fragment() {
 
             if (categories.isEmpty()) {
                 val predefined = listOf(
-                    Category(userId = userId.toString(), name = "Food", iconResId = R.drawable.blue_circle),
-                    Category(userId = userId.toString(), name = "Transport", iconResId = R.drawable.blue_circle),
-                    Category(userId = userId.toString(), name = "Medicine", iconResId = R.drawable.blue_circle),
-                    Category(userId = userId.toString(), name = "Groceries", iconResId = R.drawable.blue_circle),
-                    Category(userId = userId.toString(), name = "Rent", iconResId = R.drawable.blue_circle),
-                    Category(userId = userId.toString(), name = "Gifts", iconResId = R.drawable.blue_circle),
-                    Category(userId = userId.toString(), name = "Savings", iconResId = R.drawable.blue_circle),
-                    Category(userId = userId.toString(), name = "Entertainment", iconResId = R.drawable.blue_circle),
-                    Category(userId = userId.toString(), name = "Add", iconResId = R.drawable.blue_circle)
+                    Category(userId = userUid!!, name = "Food", iconResId = R.drawable.blue_circle),
+                    Category(userId = userUid!!, name = "Transport", iconResId = R.drawable.blue_circle),
+                    Category(userId = userUid!!, name = "Medicine", iconResId = R.drawable.blue_circle),
+                    Category(userId = userUid!!, name = "Groceries", iconResId = R.drawable.blue_circle),
+                    Category(userId = userUid!!, name = "Rent", iconResId = R.drawable.blue_circle),
+                    Category(userId = userUid!!, name = "Gifts", iconResId = R.drawable.blue_circle),
+                    Category(userId = userUid!!, name = "Savings", iconResId = R.drawable.blue_circle),
+                    Category(userId = userUid!!, name = "Entertainment", iconResId = R.drawable.blue_circle),
+                    Category(userId = userUid!!, name = "Add", iconResId = R.drawable.blue_circle)
                 )
 
                 predefined.forEach {
@@ -87,15 +87,18 @@ class CategoryFragment : Fragment() {
                 if (selectedCategory.name == "Add") {
                     showAddCategoryDialog()
                 } else {
-                    val intent = Intent(requireContext(), CategoryDetailsActivity::class.java)
-                    intent.putExtra("CATEGORY_NAME", selectedCategory.name)
-                    intent.putExtra("CATEGORY_ID", selectedCategory.categoryId) // Optional
-                    startActivity(intent)
+                    openCategoryExpensesActivity(selectedCategory.name)
                 }
             }
 
             recyclerView.adapter = adapter
         }
+    }
+
+    private fun openCategoryExpensesActivity(categoryName: String) {
+        val intent = Intent(requireContext(), CategoryDetailsActivity::class.java)
+        intent.putExtra("CATEGORY_NAME", categoryName)
+        startActivity(intent)
     }
 
     private fun showAddCategoryDialog() {
@@ -110,7 +113,7 @@ class CategoryFragment : Fragment() {
             val categoryName = input.text.toString().trim()
             if (categoryName.isNotEmpty()) {
                 val newCategory = Category(
-                    userId = userId.toString(),
+                    userId = userUid!!,
                     name = categoryName,
                     iconResId = R.drawable.blue_circle
                 )
@@ -130,12 +133,11 @@ class CategoryFragment : Fragment() {
     private fun refreshCategoryList() {
         viewLifecycleOwner.lifecycleScope.launch {
             val snapshot = firestore.collection("categories")
-                .whereEqualTo("userId", userId)
+                .whereEqualTo("userUid", userUid)
                 .get()
                 .await()
 
             val updatedCategories = snapshot.toObjects(Category::class.java)
-
             val (addCategory, otherCategories) = updatedCategories.partition { it.name == "Add" }
             val orderedCategories = otherCategories + addCategory
 
