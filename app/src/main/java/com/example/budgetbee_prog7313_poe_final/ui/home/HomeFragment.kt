@@ -34,13 +34,13 @@ class HomeFragment : Fragment() {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        // Observe greeting text
-        homeViewModel.text.observe(viewLifecycleOwner) { text ->
-            binding.textHome.text = text
+        // Greeting
+        homeViewModel.text.observe(viewLifecycleOwner) {
+            binding.textHome.text = it
         }
         homeViewModel.loadUserGreeting()
 
-        // Logout button
+        // Logout
         binding.logoutButton.setOnClickListener {
             FirebaseAuthManager.logout()
             val intent = Intent(requireContext(), LoginActivity::class.java)
@@ -48,14 +48,16 @@ class HomeFragment : Fragment() {
             startActivity(intent)
         }
 
-        // Goal inputs and save button
-        val minGoalInput = binding.editMinGoal
-        val maxGoalInput = binding.editMaxGoal
-        val saveGoalBtn = binding.btnSaveGoal
+        // Dummy values for progress demonstration
+        val dummyMin = 100.0
+        val dummyMax = 200.0
+        val dummyCurrent = 150.0
+        setupProgressBar(dummyMin, dummyMax, dummyCurrent)
 
-        saveGoalBtn.setOnClickListener {
-            val minGoal = minGoalInput.text.toString().toDoubleOrNull()
-            val maxGoal = maxGoalInput.text.toString().toDoubleOrNull()
+        // Save goal logic
+        binding.btnSaveGoal.setOnClickListener {
+            val minGoal = binding.editMinGoal.text.toString().toDoubleOrNull()
+            val maxGoal = binding.editMaxGoal.text.toString().toDoubleOrNull()
             if (minGoal == null || maxGoal == null) {
                 Toast.makeText(requireContext(), "Please enter valid numbers", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -63,6 +65,8 @@ class HomeFragment : Fragment() {
             saveGoal(minGoal, maxGoal) { success ->
                 if (success) {
                     Toast.makeText(requireContext(), "Goals saved!", Toast.LENGTH_SHORT).show()
+                    // Reuse dummyCurrent or calculate real current later
+                    setupProgressBar(minGoal, maxGoal, dummyCurrent)
                 } else {
                     Toast.makeText(requireContext(), "Failed to save goals", Toast.LENGTH_SHORT).show()
                 }
@@ -72,12 +76,17 @@ class HomeFragment : Fragment() {
         return root
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+    private fun setupProgressBar(minGoal: Double, maxGoal: Double, current: Double) {
+        val percent = when {
+            current <= minGoal -> 0
+            current >= maxGoal -> 100
+            else -> (((current - minGoal) / (maxGoal - minGoal)) * 100).toInt()
+        }
+        binding.goalProgressBar.max = 100
+        binding.goalProgressBar.progress = percent
+        binding.progressText.text = "$percent% of range"
     }
 
-    // Function to save goals to Firestore
     private fun saveGoal(minGoal: Double, maxGoal: Double, callback: (Boolean) -> Unit) {
         val userId = FirebaseAuth.getInstance().currentUser?.uid
         if (userId == null) {
@@ -99,5 +108,10 @@ class HomeFragment : Fragment() {
                 Log.e("HomeFragment", "Error saving goals", e)
                 callback(false)
             }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }
