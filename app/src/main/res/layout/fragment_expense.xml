@@ -28,10 +28,19 @@
         android:layout_marginBottom="16dp"/>
 
     <Button
+        android:id="@+id/buttonAddIncome"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Add Income"
+        android:textColor="@color/black"
+        android:backgroundTint="@color/white"
+        android:layout_marginBottom="16dp"/>
+
+    <Button
         android:id="@+id/buttonViewTransactions"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="View Transactions"
-        android:textColor="@color/black"
-        android:backgroundTint="@color/white" />
+        android:textColor="@color/white"
+        android:backgroundTint="@color/black" />
 </LinearLayout>

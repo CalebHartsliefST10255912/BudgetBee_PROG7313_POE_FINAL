@@ -33,6 +33,8 @@
         <activity android:name=".ui.category.CategoriesActivity" android:exported="true" />
         <activity android:name=".ui.category.CategoryDetailsActivity" android:exported="true" />
 
+        <!-- Income -->
+        <activity android:name=".ui.income.AddIncomeActivity" android:exported="true" />
 
 
 
