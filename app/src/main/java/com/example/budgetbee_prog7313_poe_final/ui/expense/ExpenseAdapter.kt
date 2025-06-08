@@ -4,6 +4,7 @@ package com.example.budgetbee_prog7313_poe_final.ui.expense
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.budgetbee_prog7313_poe_final.R
