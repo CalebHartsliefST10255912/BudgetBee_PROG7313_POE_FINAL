@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.budgetbee_prog7313_poe_final.R
 import com.example.budgetbee_prog7313_poe_final.model.Expense
 
+// src/main/java/com/example/budgetbee_prog7313_poe_final/ui/expense/ExpenseAdapter.kt
 class ExpenseAdapter(
     private val onClick: (Expense) -> Unit
 ) : RecyclerView.Adapter<ExpenseAdapter.ExpenseViewHolder>() {

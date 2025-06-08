@@ -13,14 +13,6 @@
 
     </LinearLayout>
 
-    <Button
-        android:id="@+id/buttonAddCategory"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Add Category"
-        android:layout_gravity="end"
-        android:layout_marginBottom="8dp"/>
-
     <!-- Grid of categories -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/categoryRecyclerView"
@@ -29,6 +21,12 @@
         android:layout_weight="1"
         android:padding="16dp" />
 
-
+    <Button
+        android:id="@+id/buttonAddCategory"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Add Category"
+        android:layout_gravity="end"
+        android:layout_marginBottom="8dp"/>
 
 </LinearLayout>
