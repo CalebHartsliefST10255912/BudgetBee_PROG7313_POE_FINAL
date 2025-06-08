@@ -1,5 +1,3 @@
-// src/main/java/com/example/budgetbee_prog7313_poe_final/ui/income/IncomeAdapter.kt
-package com.example.budgetbee_prog7313_poe_final.ui.income
 
 import android.view.LayoutInflater
 import android.view.View
@@ -9,14 +7,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.budgetbee_prog7313_poe_final.R
 import com.example.budgetbee_prog7313_poe_final.model.Income
 
+//This is the income adapter, it will help with the recylerView and formating for income
 class IncomeAdapter : RecyclerView.Adapter<IncomeAdapter.IncomeViewHolder>() {
 
-    private var incomes: List<Income> = emptyList()
+    private var incomes: List<Income> = listOf()
 
     inner class IncomeViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val incomeName: TextView   = itemView.findViewById(R.id.textIncomeName)
+        val incomeName: TextView = itemView.findViewById(R.id.textIncomeName)
         val incomeAmount: TextView = itemView.findViewById(R.id.textIncomeAmount)
-        val incomeDate: TextView   = itemView.findViewById(R.id.textIncomeDate)
+        val incomeDate: TextView = itemView.findViewById(R.id.textIncomeDate)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): IncomeViewHolder {
@@ -27,9 +26,9 @@ class IncomeAdapter : RecyclerView.Adapter<IncomeAdapter.IncomeViewHolder>() {
 
     override fun onBindViewHolder(holder: IncomeViewHolder, position: Int) {
         val income = incomes[position]
-        holder.incomeName.text   = income.name
+        holder.incomeName.text = income.name
         holder.incomeAmount.text = "R %.2f".format(income.amount)
-        holder.incomeDate.text   = income.date
+        holder.incomeDate.text = income.date
     }
 
     override fun getItemCount(): Int = incomes.size
@@ -39,3 +38,5 @@ class IncomeAdapter : RecyclerView.Adapter<IncomeAdapter.IncomeViewHolder>() {
         notifyDataSetChanged()
     }
 }
+
+

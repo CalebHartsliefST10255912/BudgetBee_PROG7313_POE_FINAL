@@ -33,9 +33,15 @@
             android:exported="true" />
         <activity android:name=".ui.expense.ExpenseDetailActivity"
             android:exported="true" />
-        
+
+        <!-- Income -->
+        <activity android:name=".ui.income.AddIncomeActivity"
+            android:exported="true" />
+        <activity android:name=".ui.income.AllIncomeActivity"
+            android:exported="true" />
+
         <!-- Goals -->
-        <activity android:name=".ui.GoalsActivity" />
+        <activity android:name=".ui.goal.GoalsActivity" />
 
         <!-- Categories -->
         <activity android:name=".ui.category.CategoriesActivity"

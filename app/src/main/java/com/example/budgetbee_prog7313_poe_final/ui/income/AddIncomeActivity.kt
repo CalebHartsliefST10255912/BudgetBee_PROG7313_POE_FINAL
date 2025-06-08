@@ -1,44 +1,33 @@
+// src/main/java/com/example/budgetbee_prog7313_poe_final/ui/income/AddIncomeActivity.kt
 package com.example.budgetbee_prog7313_poe_final.ui.income
 
-import android.annotation.SuppressLint
-import android.app.Activity
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.view.View
-import android.widget.*
+import android.widget.Button
+import android.widget.EditText
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.budgetbee_prog7313_poe_final.R
-import com.example.budgetbee_prog7313_poe_final.model.Category
-import com.google.firebase.FirebaseApp
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
+import com.example.budgetbee_prog7313_poe_final.firebase.FirebaseAuthManager
+import com.example.budgetbee_prog7313_poe_final.firebase.FirestoreManager
+import com.example.budgetbee_prog7313_poe_final.model.Income
 import java.text.SimpleDateFormat
 import java.util.*
 
 class AddIncomeActivity : AppCompatActivity() {
 
-    private val firestore = FirebaseFirestore.getInstance()
-    private val storage = FirebaseStorage.getInstance()
-    private val auth = FirebaseAuth.getInstance()
-    private var userUid: String? = null
+    private var userUid: String = ""
 
-    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_income)
 
-        FirebaseApp.initializeApp(this)
-
-        val currentUser = auth.currentUser
-        if (currentUser == null) {
+        FirebaseAuthManager.getCurrentUserId()?.let {
+            userUid = it
+        } ?: run {
             Toast.makeText(this, "User not logged in", Toast.LENGTH_SHORT).show()
             finish()
             return
         }
-
-        userUid = currentUser.uid
 
         findViewById<Button>(R.id.buttonAddIncome).setOnClickListener {
             saveIncome()
@@ -46,35 +35,24 @@ class AddIncomeActivity : AppCompatActivity() {
     }
 
     private fun saveIncome() {
-        val name = findViewById<EditText>(R.id.inputIncomeName).text.toString()
-        val amount = findViewById<EditText>(R.id.inputIncomeAmount).text.toString().toDoubleOrNull() ?: 0.0
-        val date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+        val name   = findViewById<EditText>(R.id.inputIncomeName).text.toString().trim()
+        val amount = findViewById<EditText>(R.id.inputIncomeAmount)
+            .text.toString().toDoubleOrNull() ?: 0.0
+        val date   = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
 
-        if (userUid == null) {
-            Toast.makeText(this, "User not logged in", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        val incomeData = hashMapOf<String, Any>(
-            "userUid" to userUid!!,
-            "name" to name,
-            "amount" to amount,
-            "date" to date
+        val income = Income(
+            name    = name,
+            amount  = amount,
+            date    = date
         )
 
-        saveToFirestore(incomeData)
-    }
-
-    private fun saveToFirestore(incomeData: HashMap<String, Any>) {
-        firestore.collection("incomes")
-            .add(incomeData)
-            .addOnSuccessListener {
+        FirestoreManager.addIncome(userUid, income) { success ->
+            if (success) {
                 Toast.makeText(this, "Income Added", Toast.LENGTH_SHORT).show()
                 finish()
-            }
-            .addOnFailureListener {
+            } else {
                 Toast.makeText(this, "Failed to add income", Toast.LENGTH_SHORT).show()
             }
+        }
     }
-
 }

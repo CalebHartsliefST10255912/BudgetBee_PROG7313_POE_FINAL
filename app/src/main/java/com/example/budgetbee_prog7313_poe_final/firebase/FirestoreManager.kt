@@ -104,41 +104,48 @@ object FirestoreManager {
             }
     }
 
-
-
-
-    ///////////////////////////////////////////////////////////
-
-
-
-    fun saveGoal(minGoal: Double, maxGoal: Double, onComplete: (Boolean) -> Unit) {
-        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        val db = FirebaseFirestore.getInstance()
-
+    fun saveGoal(userId: String, minGoal: Double, maxGoal: Double, onResult: (Boolean) -> Unit) {
+        // Build the month string
         val sdf = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
-        val currentMonth = sdf.format(Date())
+        val monthKey = sdf.format(Date())
 
+        // Construct the Goal object
         val goal = Goal(
-            userId = userId,
             minGoal = minGoal,
             maxGoal = maxGoal,
-            month = currentMonth
+            month   = monthKey
         )
 
-        db.collection("goals")
-            .document("$userId-$currentMonth")
+        // Write under users/{userId}/goals/{userId}-{monthKey}
+        db.collection("users")
+            .document(userId)
+            .collection("goals")
+            .document("${userId}-$monthKey")
             .set(goal)
-            .addOnSuccessListener {
-                onComplete(true)
-            }
-            .addOnFailureListener {
-                onComplete(false)
-            }
+            .addOnSuccessListener { onResult(true) }
+            .addOnFailureListener { onResult(false) }
     }
 
+    fun addIncome(userId: String, income: Income, onResult: (Boolean) -> Unit) {
+        db.collection("users")
+            .document(userId)
+            .collection("incomes")
+            .add(income)
+            .addOnSuccessListener { onResult(true) }
+            .addOnFailureListener { onResult(false) }
+    }
 
-
-
-
+    fun getIncomes(userId: String, onResult: (List<Income>) -> Unit) {
+        db.collection("users")
+            .document(userId)
+            .collection("incomes")
+            .get()
+            .addOnSuccessListener { snap ->
+                onResult(snap.toObjects(Income::class.java))
+            }
+            .addOnFailureListener {
+                onResult(emptyList())
+            }
+    }
 }
 
