@@ -31,10 +31,11 @@
             android:exported="true" />
         <activity android:name=".ui.expense.TransactionActivity"
             android:exported="true" />
-
-        <!-- ← Add this: -->
         <activity android:name=".ui.expense.ExpenseDetailActivity"
             android:exported="true" />
+        
+        <!-- Goals -->
+        <activity android:name=".ui.GoalsActivity" />
 
         <!-- Categories -->
         <activity android:name=".ui.category.CategoriesActivity"

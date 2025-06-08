@@ -1,0 +1,58 @@
+package com.example.budgetbee_prog7313_poe_final.ui
+
+
+import android.os.Bundle
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import com.example.budgetbee_prog7313_poe_final.databinding.ActivityGoalsBinding
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import java.text.SimpleDateFormat
+import java.util.*
+
+class GoalsActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityGoalsBinding
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityGoalsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        // Load existing goals
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val month = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(Date())
+        FirebaseFirestore.getInstance()
+            .collection("goals")
+            .document("$userId-$month")
+            .get()
+            .addOnSuccessListener { doc ->
+                if (doc.exists()) {
+                    binding.editMinGoal.setText(doc.getDouble("minGoal")?.toString() ?: "")
+                    binding.editMaxGoal.setText(doc.getDouble("maxGoal")?.toString() ?: "")
+                }
+            }
+
+        // Save new/edited goals
+        binding.btnSaveGoal.setOnClickListener {
+            val min = binding.editMinGoal.text.toString().toDoubleOrNull()
+            val max = binding.editMaxGoal.text.toString().toDoubleOrNull()
+            if (min == null || max == null) {
+                Toast.makeText(this, "Enter valid numbers", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            val data = mapOf("minGoal" to min, "maxGoal" to max, "month" to month)
+            FirebaseFirestore.getInstance()
+                .collection("goals")
+                .document("$userId-$month")
+                .set(data)
+                .addOnSuccessListener {
+                    Toast.makeText(this, "Goals saved", Toast.LENGTH_SHORT).show()
+                    finish()  // back to HomeFragment
+                }
+                .addOnFailureListener { e ->
+                    Toast.makeText(this, "Save failed: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+        }
+    }
+}

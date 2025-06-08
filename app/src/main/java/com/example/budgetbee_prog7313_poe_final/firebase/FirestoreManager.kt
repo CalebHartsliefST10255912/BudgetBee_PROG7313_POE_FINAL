@@ -4,9 +4,14 @@ import com.example.budgetbee_prog7313_poe_final.model.*
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.toObject
 
+import com.example.budgetbee_prog7313_poe_final.model.Goal
+import com.google.firebase.auth.FirebaseAuth
+import java.text.SimpleDateFormat
+import java.util.*
+
 object FirestoreManager {
     private val db = FirebaseFirestore.getInstance()
-
+///
     // USERS
     fun addUser(userId: String, user: User, onResult: (Boolean) -> Unit) {
         db.collection("users").document(userId).set(user)
@@ -98,4 +103,42 @@ object FirestoreManager {
                 onResult(list)
             }
     }
+
+
+
+
+    ///////////////////////////////////////////////////////////
+
+
+
+    fun saveGoal(minGoal: Double, maxGoal: Double, onComplete: (Boolean) -> Unit) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val db = FirebaseFirestore.getInstance()
+
+        val sdf = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
+        val currentMonth = sdf.format(Date())
+
+        val goal = Goal(
+            userId = userId,
+            minGoal = minGoal,
+            maxGoal = maxGoal,
+            month = currentMonth
+        )
+
+        db.collection("goals")
+            .document("$userId-$currentMonth")
+            .set(goal)
+            .addOnSuccessListener {
+                onComplete(true)
+            }
+            .addOnFailureListener {
+                onComplete(false)
+            }
+    }
+
+
+
+
+
 }
+
