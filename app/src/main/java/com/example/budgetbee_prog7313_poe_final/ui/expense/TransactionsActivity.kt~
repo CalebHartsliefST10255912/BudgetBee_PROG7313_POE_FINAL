@@ -1,7 +1,6 @@
 // TransactionActivity.kt
 package com.example.budgetbee_prog7313_poe_final.ui.expense
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager

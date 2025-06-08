@@ -79,7 +79,7 @@ class AddExpenseActivity : AppCompatActivity() {
             }
         }
     }
-
+    
     private fun setupSpinner() {
         val spinner = findViewById<Spinner>(R.id.categorySpinner)
         val names = categoriesList.map { it.name }

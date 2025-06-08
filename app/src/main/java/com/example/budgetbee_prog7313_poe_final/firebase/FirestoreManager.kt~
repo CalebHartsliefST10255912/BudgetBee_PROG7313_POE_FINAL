@@ -13,7 +13,7 @@ object FirestoreManager {
             .addOnSuccessListener { onResult(true) }
             .addOnFailureListener { onResult(false) }
     }
-    
+
     fun getUser(userId: String, onResult: (User?) -> Unit) {
         db.collection("users").document(userId).get()
             .addOnSuccessListener { snapshot ->
@@ -31,50 +31,83 @@ object FirestoreManager {
 
 
     // CATEGORIES
-    fun addCategory(category: Category, onResult: (Boolean) -> Unit) {
-        db.collection("categories").add(category)
+    private val defaultCategories = listOf(
+        "Food", "Health", "Shopping", "Transport", "Entertainment",
+        "Rent", "Gifts", "Groceries", "Medicine", "Savings"
+    )
+
+    fun initializeDefaultCategories(userId: String, onResult: (Boolean) -> Unit) {
+        val defaultCategoryDocs = defaultCategories.map { name ->
+            Category(name = name, isDefault = true)
+        }
+        
+        db.runBatch { batch ->
+            defaultCategoryDocs.forEach { category ->
+                batch.set(
+                    db.collection("users").document(userId)
+                        .collection("categories/default_categories").document(),
+                    category
+                )
+            }
+        }.addOnSuccessListener { onResult(true) }
+            .addOnFailureListener { onResult(false) }
+    }
+
+    fun addCustomCategory(userId: String, category: Category, onResult: (Boolean) -> Unit) {
+        db.collection("users").document(userId)
+            .collection("categories/custom_categories").document()
+            .set(category)
             .addOnSuccessListener { onResult(true) }
             .addOnFailureListener { onResult(false) }
     }
 
     fun getCategories(userId: String, onResult: (List<Category>) -> Unit) {
-        db.collection("categories")
-            .whereEqualTo("userId", userId)
-            .get()
-            .addOnSuccessListener { snapshot ->
-                val list = snapshot.documents.mapNotNull { it.toObject<Category>() }
-                onResult(list)
+        // Get both default and custom categories
+        val defaultQuery = db.collection("users").document(userId).collection("categories/default_categories")
+        val customQuery = db.collection("users").document(userId).collection("categories/custom_categories")
+
+        defaultQuery.get()
+            .addOnSuccessListener { defaultSnapshot ->
+                customQuery.get()
+                    .addOnSuccessListener { customSnapshot ->
+                        val defaultCategories = defaultSnapshot.toObjects(Category::class.java)
+                        val customCategories = customSnapshot.toObjects(Category::class.java)
+                        val allCategories = defaultCategories + customCategories
+                        onResult(allCategories)
+
+                    }
+                    .addOnFailureListener { onResult(emptyList()) }
             }
+            .addOnFailureListener { onResult(emptyList()) }
     }
 
     // EXPENSES
-    fun addExpense(expense: Expense, onResult: (Boolean) -> Unit) {
-        db.collection("expenses").add(expense)
+    fun addExpense(userId: String, expense: Expense, onResult: (Boolean) -> Unit) {
+        db.collection("users").document(userId).collection("expenses").add(expense)
             .addOnSuccessListener { onResult(true) }
             .addOnFailureListener { onResult(false) }
     }
 
     fun getExpenses(userId: String, onResult: (List<Expense>) -> Unit) {
-        db.collection("expenses")
-            .whereEqualTo("userId", userId)
-            .get()
+        db.collection("users").document(userId).collection("expenses").get()
             .addOnSuccessListener { snapshot ->
-                val list = snapshot.documents.mapNotNull { it.toObject<Expense>() }
+                val list = snapshot.toObjects(Expense::class.java)
                 onResult(list)
             }
     }
 
     // GOALS
     fun setGoal(userId: String, goal: Goal, onResult: (Boolean) -> Unit) {
-        db.collection("goals").document(userId).set(goal)
+        db.collection("users").document(userId).collection("goals").add(goal)
             .addOnSuccessListener { onResult(true) }
             .addOnFailureListener { onResult(false) }
     }
 
-    fun getGoal(userId: String, onResult: (Goal?) -> Unit) {
-        db.collection("goals").document(userId).get()
+    fun getGoal(userId: String, onResult: (List<Goal>) -> Unit) {
+        db.collection("users").document(userId).collection("goals").get()
             .addOnSuccessListener { snapshot ->
-                onResult(snapshot.toObject<Goal>())
+                val list = snapshot.toObjects(Goal::class.java)
+                onResult(list)
             }
     }
 }
