@@ -21,21 +21,26 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.BudgetBee_PROG7313_POE_FINAL"
         tools:targetApi="31">
+
+        <!-- Authentication -->
         <activity android:name=".LoginActivity" />
         <activity android:name=".RegisterActivity" />
 
         <!-- Expenses -->
-        <activity android:name=".ui.expense.AddExpenseActivity" android:exported="true" />
+        <activity android:name=".ui.expense.AddExpenseActivity"
+            android:exported="true" />
+        <activity android:name=".ui.expense.TransactionActivity"
+            android:exported="true" />
 
-        <activity android:name=".ui.expense.TransactionActivity" android:exported="true" />
+        <!-- ← Add this: -->
+        <activity android:name=".ui.expense.ExpenseDetailActivity"
+            android:exported="true" />
 
-        <!-- Category -->
-        <activity android:name=".ui.category.CategoriesActivity" android:exported="true" />
-        <activity android:name=".ui.category.CategoryDetailsActivity" android:exported="true" />
-
-
-
-
+        <!-- Categories -->
+        <activity android:name=".ui.category.CategoriesActivity"
+            android:exported="true" />
+        <activity android:name=".ui.category.CategoryDetailsActivity"
+            android:exported="true" />
 
         <activity
             android:name=".MainActivity"

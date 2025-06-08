@@ -1,6 +1,6 @@
 package com.example.budgetbee_prog7313_poe_final.ui.category
 
-import ExpenseAdapter
+import android.content.Intent
 import android.os.Bundle
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -10,16 +10,16 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.budgetbee_prog7313_poe_final.R
+import com.example.budgetbee_prog7313_poe_final.firebase.FirebaseAuthManager
+import com.example.budgetbee_prog7313_poe_final.firebase.FirestoreManager
 import com.example.budgetbee_prog7313_poe_final.model.Expense
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
+import com.example.budgetbee_prog7313_poe_final.ui.expense.ExpenseAdapter
+import com.example.budgetbee_prog7313_poe_final.ui.expense.ExpenseDetailActivity
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 
 class CategoryDetailsActivity : AppCompatActivity() {
 
-    private val firestore = FirebaseFirestore.getInstance()
-    private var userUid: String? = null
+    private var userUid: String = ""
 
     private lateinit var textCategoryTitle: TextView
     private lateinit var textTotalBalance: TextView
@@ -27,68 +27,78 @@ class CategoryDetailsActivity : AppCompatActivity() {
     private lateinit var expenseProgress: ProgressBar
     private lateinit var textProgressSummary: TextView
     private lateinit var recyclerExpenses: RecyclerView
-
     private lateinit var expenseAdapter: ExpenseAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_category_details)
 
-        userUid = FirebaseAuth.getInstance().currentUser?.uid
-
-        if (userUid == null) {
+        // Auth check
+        FirebaseAuthManager.getCurrentUserId()?.let {
+            userUid = it
+        } ?: run {
             Toast.makeText(this, "User not logged in", Toast.LENGTH_SHORT).show()
             finish()
             return
         }
 
-        textCategoryTitle = findViewById(R.id.textCategoryTitle)
-        textTotalBalance = findViewById(R.id.textTotalBalance)
-        textTotalExpense = findViewById(R.id.textTotalExpense)
-        expenseProgress = findViewById(R.id.expenseProgress)
-        textProgressSummary = findViewById(R.id.textProgressSummary)
-        recyclerExpenses = findViewById(R.id.recyclerExpenses)
+        // Get the category we’re displaying
+        val categoryName = intent.getStringExtra("CATEGORY_NAME") ?: ""
 
+        // Bind views
+        textCategoryTitle   = findViewById(R.id.textCategoryTitle)
+        textTotalBalance    = findViewById(R.id.textTotalBalance)
+        textTotalExpense    = findViewById(R.id.textTotalExpense)
+        expenseProgress     = findViewById(R.id.expenseProgress)
+        textProgressSummary = findViewById(R.id.textProgressSummary)
+        recyclerExpenses    = findViewById(R.id.recyclerExpenses)
+
+        // Setup RecyclerView + adapter with click handler
         recyclerExpenses.layoutManager = LinearLayoutManager(this)
-        expenseAdapter = ExpenseAdapter()       // Initialize with no arguments
+        expenseAdapter = ExpenseAdapter { expense ->
+            // Launch detail screen with all fields passed as extras
+            val intent = Intent(this, ExpenseDetailActivity::class.java).apply {
+                putExtra("name",        expense.name)
+                putExtra("amount",      expense.amount)
+                putExtra("date",        expense.date)
+                putExtra("category",    expense.category)
+                putExtra("description", expense.description)
+                putExtra("location",    expense.location)
+                putExtra("startTime",   expense.startTime)
+                putExtra("endTime",     expense.endTime)
+                putExtra("photoPath",   expense.photoPath)
+            }
+            startActivity(intent)
+        }
         recyclerExpenses.adapter = expenseAdapter
 
-        val categoryName = intent.getStringExtra("CATEGORY_NAME") ?: ""
         textCategoryTitle.text = categoryName
 
+        // Load and display all expenses for this category
         loadExpenses(categoryName)
     }
 
     private fun loadExpenses(categoryName: String) {
         lifecycleScope.launch {
-            try {
-                val expensesSnapshot = firestore.collection("expenses")
-                    .whereEqualTo("userUid", userUid)
-                    .whereEqualTo("category", categoryName)
-                    .get()
-                    .await()
+            FirestoreManager.getExpenses(userUid) { expenses ->
+                val filtered = expenses.filter { it.category == categoryName }
 
-                val expenses = expensesSnapshot.toObjects(Expense::class.java)
-
-                // Calculate totals
-                val totalExpense = expenses.filter { it.amount < 0 }.sumOf { it.amount }
-                val totalIncome = expenses.filter { it.amount > 0 }.sumOf { it.amount }
+                // Totals
+                val totalExpense = filtered.filter { it.amount < 0 }.sumOf { it.amount }
+                val totalIncome  = filtered.filter { it.amount > 0 }.sumOf { it.amount }
                 val totalBalance = totalIncome + totalExpense
 
-                textTotalBalance.text = String.format("R%.2f", totalBalance)
-                textTotalExpense.text = String.format("-R%.2f", -totalExpense) // expenses negative, show positive
+                textTotalBalance.text = "R%.2f".format(totalBalance)
+                textTotalExpense.text = "-R%.2f".format(-totalExpense)
 
-                // Progress bar example (expense percentage)
-                val maxBudget = 1000.0 // example budget
-                val progressPercent = ((-totalExpense / maxBudget) * 100).toInt().coerceIn(0, 100)
+                // Progress (example budget of 1000)
+                val progressPercent = ((-totalExpense / 1000.0) * 100).toInt().coerceIn(0, 100)
                 expenseProgress.progress = progressPercent
-                textProgressSummary.text = "$progressPercent% of your budget. ${if (progressPercent > 80) "Careful!" else "Looks good."}"
+                textProgressSummary.text =
+                    "$progressPercent% of your budget. ${if (progressPercent > 80) "Careful!" else "Looks good."}"
 
-                // Update RecyclerView using submitList()
-                expenseAdapter.submitList(expenses)
-
-            } catch (e: Exception) {
-                Toast.makeText(this@CategoryDetailsActivity, "Failed to load expenses", Toast.LENGTH_SHORT).show()
+                // Update list
+                expenseAdapter.submitList(filtered)
             }
         }
     }

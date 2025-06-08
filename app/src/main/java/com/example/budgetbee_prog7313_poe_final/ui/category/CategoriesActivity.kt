@@ -3,79 +3,66 @@ package com.example.budgetbee_prog7313_poe_final.ui.category
 import android.content.Intent
 import android.os.Bundle
 import android.widget.EditText
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.budgetbee_prog7313_poe_final.LoginActivity
 import com.example.budgetbee_prog7313_poe_final.R
+import com.example.budgetbee_prog7313_poe_final.firebase.FirebaseAuthManager
 import com.example.budgetbee_prog7313_poe_final.firebase.FirestoreManager
 import com.example.budgetbee_prog7313_poe_final.model.Category
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 
 class CategoriesActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: CategoryAdapter
-    private lateinit var firestore: FirebaseFirestore
-    private lateinit var auth: FirebaseAuth
     private var userUid: String? = null
-
-
-    private val categoryCollectionName = "categories"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.fragment_category)
 
-        // Initialize FirebaseAuth
-        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        FirestoreManager.getUser(uid) { user ->
-            if (user != null) {
-                firestore = FirebaseFirestore.getInstance()
-                recyclerView = findViewById(R.id.categoryRecyclerView)
-                recyclerView.layoutManager = GridLayoutManager(this, 3)
-            } else {
-                startActivity(Intent(this, LoginActivity::class.java))
-            }
+        recyclerView = findViewById(R.id.categoryRecyclerView)
+        recyclerView.layoutManager = GridLayoutManager(this, 3)
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        val uid = FirebaseAuthManager.getCurrentUserId()
+        if (uid == null) {
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+            return
         }
 
-        loadCategories()
+        userUid = uid
+
+        FirestoreManager.getUser(uid) { user ->
+            if (user == null) {
+                Toast.makeText(this, "User data not found", Toast.LENGTH_SHORT).show()
+                FirebaseAuthManager.logout()
+                startActivity(Intent(this, LoginActivity::class.java))
+                finish()
+            } else {
+                loadCategories()
+            }
+        }
     }
 
     private fun loadCategories() {
-        val userCategoriesRef = firestore.collection("users")
-            .document(userUid!!)
-            .collection(categoryCollectionName)
-
-        userCategoriesRef.get().addOnSuccessListener { snapshot ->
-            if (snapshot.isEmpty) {
-                val predefined = listOf(
-                    Category(name = "Food", iconResId = R.drawable.blue_circle),
-                    Category(name = "Transport", iconResId = R.drawable.blue_circle),
-                    Category(name = "Medicine", iconResId = R.drawable.blue_circle),
-                    Category(name = "Groceries", iconResId = R.drawable.blue_circle),
-                    Category(name = "Rent", iconResId = R.drawable.blue_circle),
-                    Category(name = "Gifts", iconResId = R.drawable.blue_circle),
-                    Category(name = "Savings", iconResId = R.drawable.blue_circle),
-                    Category(name = "Entertainment", iconResId = R.drawable.blue_circle),
-                    Category(name = "Add", iconResId = R.drawable.blue_circle)
-                )
-
-                predefined.forEach {
-                    userCategoriesRef.add(it)
+        FirestoreManager.getCategories(userUid!!) { categories ->
+            if (categories.isEmpty()) {
+                FirestoreManager.initializeDefaultCategories(userUid!!) { success ->
+                    if (success) {
+                        loadCategories()
+                    } else {
+                        Toast.makeText(this, "Failed to initialize categories", Toast.LENGTH_SHORT).show()
+                    }
                 }
-
-                // Re-fetch after adding
-                loadCategories()
             } else {
-                val categories = snapshot.documents.mapNotNull { doc ->
-                    val name = doc.getString("name") ?: return@mapNotNull null
-                    val iconResId = (doc.getLong("iconResId") ?: R.drawable.blue_circle).toString()
-                    Category(doc.id, name, iconResId)
-                }
-
                 val (moreCategory, otherCategories) = categories.partition { it.name == "Add" }
                 val orderedCategories = otherCategories + moreCategory
 
@@ -106,15 +93,19 @@ class CategoriesActivity : AppCompatActivity() {
         builder.setPositiveButton("Add") { dialog, _ ->
             val categoryName = input.text.toString().trim()
             if (categoryName.isNotEmpty()) {
-                val newCategory = Category(name = categoryName, iconResId = R.drawable.blue_circle)
+                val newCategory = Category(
+                    name = categoryName,
+                    iconResId = R.drawable.blue_circle,
+                    isDefault = false
+                )
 
-                firestore.collection("users")
-                    .document(userUid!!)
-                    .collection(categoryCollectionName)
-                    .add(newCategory)
-                    .addOnSuccessListener {
+                FirestoreManager.addCustomCategory(userUid!!, newCategory) { success ->
+                    if (success) {
                         loadCategories()
+                    } else {
+                        Toast.makeText(this, "Failed to add category", Toast.LENGTH_SHORT).show()
                     }
+                }
             }
             dialog.dismiss()
         }
