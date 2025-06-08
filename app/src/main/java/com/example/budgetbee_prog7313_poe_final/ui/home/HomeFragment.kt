@@ -11,17 +11,21 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.budgetbee_prog7313_poe_final.LoginActivity
 import com.example.budgetbee_prog7313_poe_final.databinding.FragmentHomeBinding
 import com.example.budgetbee_prog7313_poe_final.firebase.FirebaseAuthManager
-import com.example.budgetbee_prog7313_poe_final.ui.GoalsActivity
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
+import com.example.budgetbee_prog7313_poe_final.firebase.FirestoreManager
+import com.example.budgetbee_prog7313_poe_final.model.Goal
+import com.example.budgetbee_prog7313_poe_final.ui.goal.GoalsActivity
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import java.util.*
 
 class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
+
+    // Must match FirestoreManager.saveGoal's month format
+    private val monthKey: String by lazy {
+        SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(Date())
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -30,7 +34,6 @@ class HomeFragment : Fragment() {
     ): View {
         val homeViewModel = ViewModelProvider(this).get(HomeViewModel::class.java)
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
-        val root = binding.root
 
         // Greeting
         homeViewModel.text.observe(viewLifecycleOwner) {
@@ -41,55 +44,64 @@ class HomeFragment : Fragment() {
         // Logout
         binding.logoutButton.setOnClickListener {
             FirebaseAuthManager.logout()
-            val intent = Intent(requireContext(), LoginActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            startActivity(intent)
+            Intent(requireContext(), LoginActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                startActivity(this)
+            }
         }
 
-        // Edit Goals button
+        // Edit Goals
         binding.btnEditGoals.setOnClickListener {
             startActivity(Intent(requireContext(), GoalsActivity::class.java))
         }
 
-        // Load & display saved goals
+        // Load & display goals
         loadAndDisplayGoals()
 
-        return root
+        return binding.root
     }
 
     private fun loadAndDisplayGoals() {
-        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        val month = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(Date())
-        FirebaseFirestore.getInstance()
-            .collection("goals")
-            .document("$userId-$month")
-            .get()
-            .addOnSuccessListener { doc ->
-                if (doc.exists()) {
-                    val minGoal = doc.getDouble("minGoal") ?: 0.0
-                    val maxGoal = doc.getDouble("maxGoal") ?: 0.0
-                    binding.minGoalText.text = "Min: R$minGoal"
-                    binding.maxGoalText.text = "Max: R$maxGoal"
-                    val dummyCurrent = (minGoal + maxGoal) / 2
-                    setupProgressBar(minGoal, maxGoal, dummyCurrent)
-                } else {
-                    binding.minGoalText.text = "Min: –"
-                    binding.maxGoalText.text = "Max: –"
+        val userId = FirebaseAuthManager.getCurrentUserId() ?: return
+
+        FirestoreManager.getGoal(userId) { goals: List<Goal> ->
+            // Find this month’s goal
+            val thisMonthGoal = goals.find { it.month == monthKey }
+
+            if (thisMonthGoal != null) {
+                val min = thisMonthGoal.minGoal
+                val max = thisMonthGoal.maxGoal
+
+                binding.minGoalText.text = "Min: R$min"
+                binding.maxGoalText.text = "Max: R$max"
+
+                // For demo: assume current halfway between
+                val current = (min + max) / 2.0
+                setupProgressBar(min, max, current)
+            } else {
+                binding.minGoalText.text = "Min: –"
+                binding.maxGoalText.text = "Max: –"
+                binding.goalProgressBar.apply {
+                    max = 100
+                    progress = 0
                 }
+                binding.progressText.text = ""
             }
-            .addOnFailureListener { e ->
-                Log.e("HomeFragment", "Error loading goals", e)
-            }
+        }
     }
 
     private fun setupProgressBar(min: Double, max: Double, current: Double) {
-        val percent = when {
+        // percent is Int, never reassigns a val
+        val percent: Int = when {
             current <= min -> 0
             current >= max -> 100
-            else -> (((current - min) / (max - min)) * 100).toInt()
+            else           -> (((current - min) / (max - min)) * 100).toInt()
         }
-        binding.goalProgressBar.max = 100
-        binding.goalProgressBar.progress = percent
+
+        binding.goalProgressBar.apply {
+            this.max = 100
+            this.progress = percent
+        }
         binding.progressText.text = "$percent% of range"
     }
 

@@ -7,6 +7,9 @@ import android.view.*
 import android.widget.Button
 import androidx.fragment.app.Fragment
 import com.example.budgetbee_prog7313_poe_final.R
+import com.example.budgetbee_prog7313_poe_final.ui.goal.GoalsActivity
+import com.example.budgetbee_prog7313_poe_final.ui.income.AddIncomeActivity
+import com.example.budgetbee_prog7313_poe_final.ui.income.AllIncomeActivity
 
 class ExpenseFragment : Fragment() {
 
@@ -18,6 +21,14 @@ class ExpenseFragment : Fragment() {
         }
         view.findViewById<Button>(R.id.buttonViewTransactions).setOnClickListener {
             startActivity(Intent(requireContext(), TransactionActivity::class.java))
+        }
+
+        // When the button is clicked, navigate to the AddIncomeActivity
+        view.findViewById<Button>(R.id.buttonAddIncome).setOnClickListener {
+            startActivity(Intent(requireContext(), AddIncomeActivity::class.java))
+        }
+        view.findViewById<Button>(R.id.buttonViewIncome).setOnClickListener {
+            startActivity(Intent(requireContext(), AllIncomeActivity::class.java))
         }
         return view
     }
