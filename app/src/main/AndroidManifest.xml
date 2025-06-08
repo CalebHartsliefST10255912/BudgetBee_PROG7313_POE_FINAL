@@ -35,7 +35,7 @@
 
         <!-- Income -->
         <activity android:name=".ui.income.AddIncomeActivity" android:exported="true" />
-
+        <activity android:name=".ui.income.AllIncomeActivity" android:exported="true" />
 
 
 

@@ -15,6 +15,7 @@ class IncomeAdapter : RecyclerView.Adapter<IncomeAdapter.IncomeViewHolder>() {
     inner class IncomeViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val incomeName: TextView = itemView.findViewById(R.id.textIncomeName)
         val incomeAmount: TextView = itemView.findViewById(R.id.textIncomeAmount)
+        val incomeDate: TextView = itemView.findViewById(R.id.textIncomeDate)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): IncomeViewHolder {
@@ -27,6 +28,7 @@ class IncomeAdapter : RecyclerView.Adapter<IncomeAdapter.IncomeViewHolder>() {
         val income = incomes[position]
         holder.incomeName.text = income.name
         holder.incomeAmount.text = "R %.2f".format(income.amount)
+        holder.incomeDate.text = income.date
     }
 
     override fun getItemCount(): Int = incomes.size

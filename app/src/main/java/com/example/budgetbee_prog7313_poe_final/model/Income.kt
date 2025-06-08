@@ -4,5 +4,6 @@ data class Income(
     val incomeId: Int = 0,
     val userId: String = "",
     val name: String = "",
+    val date: String = "",
     val amount: Double = 0.0
 )

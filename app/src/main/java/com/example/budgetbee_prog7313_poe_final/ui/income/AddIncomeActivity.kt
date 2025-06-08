@@ -48,6 +48,7 @@ class AddIncomeActivity : AppCompatActivity() {
     private fun saveIncome() {
         val name = findViewById<EditText>(R.id.inputIncomeName).text.toString()
         val amount = findViewById<EditText>(R.id.inputIncomeAmount).text.toString().toDoubleOrNull() ?: 0.0
+        val date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
 
         if (userUid == null) {
             Toast.makeText(this, "User not logged in", Toast.LENGTH_SHORT).show()
@@ -57,7 +58,8 @@ class AddIncomeActivity : AppCompatActivity() {
         val incomeData = hashMapOf<String, Any>(
             "userUid" to userUid!!,
             "name" to name,
-            "amount" to amount
+            "amount" to amount,
+            "date" to date
         )
 
         saveToFirestore(incomeData)

@@ -1,4 +1,4 @@
-package com.example.budgetbee_prog7313_poe_final.ui.expense
+package com.example.budgetbee_prog7313_poe_final.ui.income
 
 import ExpenseAdapter
 import IncomeAdapter
@@ -16,29 +16,29 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-class TransactionActivity : AppCompatActivity() {
+class AllIncomeActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: ExpenseAdapter
+    private lateinit var adapter: IncomeAdapter
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_transactions)
+        setContentView(R.layout.activity_all_income)
 
         FirebaseApp.initializeApp(this)
 
         recyclerView = findViewById(R.id.recyclerViewTransactions)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        adapter = ExpenseAdapter()
+        adapter = IncomeAdapter()
         recyclerView.adapter = adapter
-
-        fetchExpenses()
+        fetchIncomes()
     }
 
-    private fun fetchExpenses() {
+
+    private fun fetchIncomes() {
         val userUid = auth.currentUser?.uid
 
         if (userUid == null) {
@@ -48,13 +48,13 @@ class TransactionActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
-                val snapshot = firestore.collection("expenses")
+                val snapshot = firestore.collection("incomes")
                     .whereEqualTo("userUid", userUid)
                     .get()
                     .await()
 
-                val expenses = snapshot.toObjects(Expense::class.java)
-                adapter.submitList(expenses)
+                val incomes = snapshot.toObjects(Income::class.java)
+                adapter.submitList(incomes)
 
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -62,6 +62,4 @@ class TransactionActivity : AppCompatActivity() {
             }
         }
     }
-
-
 }
