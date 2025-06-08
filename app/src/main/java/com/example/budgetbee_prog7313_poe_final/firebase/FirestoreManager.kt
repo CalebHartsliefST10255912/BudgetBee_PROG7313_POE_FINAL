@@ -171,5 +171,20 @@ object FirestoreManager {
             .addOnFailureListener { onResult(false) }
     }
 
+    // In FirestoreManager (firebase/FirestoreManager.kt)
+    fun updateLoan(userId: String, loan: Loan, onResult: (Boolean) -> Unit) {
+        if (loan.id.isBlank()) {
+            onResult(false) // no ID → can’t update
+            return
+        }
+        db.collection("users")
+            .document(userId)
+            .collection("loans")
+            .document(loan.id)
+            .set(loan)               // overwrite existing doc
+            .addOnSuccessListener  { onResult(true) }
+            .addOnFailureListener  { onResult(false) }
+    }
+
 }
 
