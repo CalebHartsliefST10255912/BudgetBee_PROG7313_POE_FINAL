@@ -147,5 +147,29 @@ object FirestoreManager {
                 onResult(emptyList())
             }
     }
+    // LOANS
+    fun addLoan(userId: String, loan: Loan, onResult: (Boolean) -> Unit) {
+        val docRef = db.collection("users").document(userId).collection("loans").document()
+        val loanWithId = loan.copy(id = docRef.id)
+        docRef.set(loanWithId)
+            .addOnSuccessListener { onResult(true) }
+            .addOnFailureListener { onResult(false) }
+    }
+
+    fun getLoans(userId: String, onResult: (List<Loan>) -> Unit) {
+        db.collection("users").document(userId).collection("loans").get()
+            .addOnSuccessListener { snapshot ->
+                onResult(snapshot.toObjects(Loan::class.java))
+            }
+            .addOnFailureListener { onResult(emptyList()) }
+    }
+
+    fun deleteLoan(userId: String, loanId: String, onResult: (Boolean) -> Unit) {
+        db.collection("users").document(userId).collection("loans").document(loanId)
+            .delete()
+            .addOnSuccessListener { onResult(true) }
+            .addOnFailureListener { onResult(false) }
+    }
+
 }
 
