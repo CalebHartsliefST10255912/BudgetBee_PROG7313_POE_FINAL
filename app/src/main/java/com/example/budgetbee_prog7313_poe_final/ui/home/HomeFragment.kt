@@ -8,7 +8,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import com.example.budgetbee_prog7313_poe_final.LoginActivity
+import com.example.budgetbee_prog7313_poe_final.R
 import com.example.budgetbee_prog7313_poe_final.databinding.FragmentHomeBinding
 import com.example.budgetbee_prog7313_poe_final.firebase.FirebaseAuthManager
 import com.example.budgetbee_prog7313_poe_final.firebase.FirestoreManager
@@ -34,6 +36,10 @@ class HomeFragment : Fragment() {
     ): View {
         val homeViewModel = ViewModelProvider(this).get(HomeViewModel::class.java)
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
+
+        binding.btnGoToMissions.setOnClickListener {
+            findNavController().navigate(R.id.missionsFragment)
+        }
 
         // Greeting
         homeViewModel.text.observe(viewLifecycleOwner) {

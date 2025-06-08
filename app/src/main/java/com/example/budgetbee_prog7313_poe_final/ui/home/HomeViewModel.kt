@@ -19,6 +19,8 @@ class HomeViewModel : ViewModel() {
             } else {
                 _text.postValue("Welcome!")
             }
+
+
         }
     }
 }
