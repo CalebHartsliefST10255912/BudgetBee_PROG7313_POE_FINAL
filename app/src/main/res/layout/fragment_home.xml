@@ -56,6 +56,12 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
+<!--    Chugh, A. (2022) Android ProgressBar example. https://www.digitalocean.com/community/tutorials/android-progressbar-example?-->
+
+<!--    Android activity demonstrating having progress bars within RecyclerView elements and how these progress bars can be updated from an Asynchronous task. (no date). https://gist.github.com/davidjoneshedgehog/246cf7a351944e525fb96ba0559c8bea?permalink_comment_id=3210683&.-->
+
+<!--    GeeksforGeeks (2025) How to display percentage on a ProgressBar in Android? https://www.geeksforgeeks.org/how-to-display-percentage-on-a-progressbar-in-android/?utm_source=chatgpt.com.-->
+<!--    -->
     <!-- Progress bar and text -->
     <ProgressBar
         android:id="@+id/goalProgressBar"
