@@ -30,6 +30,8 @@ class CategoryDetailsActivity : AppCompatActivity() {
     private lateinit var expenseAdapter: ExpenseAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Hide the Action Bar
+        supportActionBar?.hide()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_category_details)
 

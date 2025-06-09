@@ -51,7 +51,9 @@ dependencies {
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-storage-ktx")
 
-    // MPAndroidChart
+    // MPAndroidChart PhilJay (2019). PhilJay/MPAndroidChart. [online] GitHub. Available at: https://github.com/PhilJay/MPAndroidChart.
+    //
+    //‌
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
     implementation(libs.androidx.core.ktx)

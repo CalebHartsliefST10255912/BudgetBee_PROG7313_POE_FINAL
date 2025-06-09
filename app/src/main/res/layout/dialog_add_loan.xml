@@ -1,47 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="match_parent"
+    android:background="@color/bee_yellow"
+    android:padding="24dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="24dp">
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/textLoanHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Add Loan Details"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="32dp"/>
 
         <EditText
             android:id="@+id/etAmount"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Loan Amount"
-            android:inputType="numberDecimal"/>
+            android:inputType="numberDecimal"
+            android:backgroundTint="@color/black"
+            android:textColor="@color/black"
+            android:textColorHint="@color/black"
+            android:minHeight="48dp"
+            android:layout_marginBottom="16dp"/>
 
         <EditText
             android:id="@+id/etRate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Interest Rate (%)"
-            android:inputType="numberDecimal"/>
+            android:inputType="numberDecimal"
+            android:backgroundTint="@color/black"
+            android:textColor="@color/black"
+            android:textColorHint="@color/black"
+            android:minHeight="48dp"
+            android:layout_marginBottom="16dp"/>
 
         <EditText
             android:id="@+id/etMinRepay"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Minimum Repayment"
-            android:inputType="numberDecimal"/>
+            android:inputType="numberDecimal"
+            android:backgroundTint="@color/black"
+            android:textColor="@color/black"
+            android:textColorHint="@color/black"
+            android:minHeight="48dp"
+            android:layout_marginBottom="16dp"/>
 
         <EditText
             android:id="@+id/etPaid"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Amount Already Paid"
-            android:inputType="numberDecimal"/>
+            android:inputType="numberDecimal"
+            android:backgroundTint="@color/black"
+            android:textColor="@color/black"
+            android:textColorHint="@color/black"
+            android:minHeight="48dp"
+            android:layout_marginBottom="16dp"/>
 
         <EditText
             android:id="@+id/etMonths"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Repay In (months)"
-            android:inputType="number"/>
+            android:inputType="number"
+            android:backgroundTint="@color/black"
+            android:textColor="@color/black"
+            android:textColorHint="@color/black"
+            android:minHeight="48dp"
+            android:layout_marginBottom="16dp"/>
     </LinearLayout>
 </ScrollView>

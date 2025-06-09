@@ -11,6 +11,8 @@ import com.example.budgetbee_prog7313_poe_final.R
 class ExpenseDetailActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Hide the Action Bar
+        supportActionBar?.hide()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_expense_detail) // rename your XML to this
 

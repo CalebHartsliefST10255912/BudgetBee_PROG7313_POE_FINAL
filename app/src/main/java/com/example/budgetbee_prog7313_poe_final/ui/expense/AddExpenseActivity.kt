@@ -33,6 +33,8 @@ class AddExpenseActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_expense)
 
+        supportActionBar?.hide()
+
         FirebaseAuthManager.getCurrentUserId()?.let {
             userUid = it
         } ?: run {
