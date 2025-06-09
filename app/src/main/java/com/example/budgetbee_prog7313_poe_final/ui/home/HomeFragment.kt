@@ -24,7 +24,7 @@ class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
-    // Must match FirestoreManager.saveGoal's month format
+
     private val monthKey: String by lazy {
         SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(Date())
     }
@@ -37,8 +37,19 @@ class HomeFragment : Fragment() {
         val homeViewModel = ViewModelProvider(this).get(HomeViewModel::class.java)
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
 
+        //Button to go to the missions board
         binding.btnGoToMissions.setOnClickListener {
             findNavController().navigate(R.id.missionsFragment)
+        }
+
+        //Button to go to the Rewards page
+        binding.btnGoToRewards.setOnClickListener {
+            findNavController().navigate(R.id.RewardFragment)
+        }
+
+        //Button to go to the user's rewards page
+        binding.btnGoToMyRewards.setOnClickListener {
+            findNavController().navigate(R.id.myRewardFragment)
         }
 
         // Greeting

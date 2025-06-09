@@ -1,5 +1,6 @@
 package com.example.budgetbee_prog7313_poe_final.firebase
 
+import android.util.Log
 import com.example.budgetbee_prog7313_poe_final.model.*
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldValue
@@ -10,6 +11,7 @@ import java.util.Date
 import java.util.Locale
 import com.example.budgetbee_prog7313_poe_final.model.Goal
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.Query
 import java.util.*
 
 object FirestoreManager {
@@ -121,7 +123,6 @@ object FirestoreManager {
             month   = monthKey
         )
 
-        // Write under users/{userId}/goals/{userId}-{monthKey}
         db.collection("users")
             .document(userId)
             .collection("goals")
@@ -199,17 +200,7 @@ object FirestoreManager {
     }
 
 
-
     //POINTS
-    fun getUserPoints(userId: String, onResult: (Point?) -> Unit) {
-        db.collection("points").document(userId).get()
-            .addOnSuccessListener { snapshot ->
-                val points = snapshot.toObject(Point::class.java)
-                onResult(points)
-            }
-            .addOnFailureListener { onResult(null) }
-    }
-
     fun updateHoneyPoints(userId: String, amount: Int, onResult: (Boolean) -> Unit) {
         db.collection("points").document(userId)
             .update("honeyPoints", FieldValue.increment(amount.toLong()))
@@ -222,25 +213,139 @@ object FirestoreManager {
             }
     }
 
-    //REWARDS
-    fun addReward(reward: Reward, onResult: (Boolean) -> Unit) {
-        db.collection("rewards").document(reward.id).set(reward)
-            .addOnSuccessListener { onResult(true) }
-            .addOnFailureListener { onResult(false) }
-    }
+    fun getUserPoints(userId: String, callback: (Int) -> Unit) {
+        val db = FirebaseFirestore.getInstance()
+        val pointsDocRef = db.collection("points").document(userId)
 
-    fun getAvailableRewards(onResult: (List<Reward>) -> Unit) {
-        db.collection("rewards")
-            .whereEqualTo("isActive", true)
-            .get()
-            .addOnSuccessListener { snapshot ->
-                val rewards = snapshot.documents.mapNotNull { it.toObject(Reward::class.java) }
-                onResult(rewards)
+        pointsDocRef.get()
+            .addOnSuccessListener { document ->
+                val points = document.getLong("honeyPoints")?.toInt() ?: 0
+                callback(points)
+            }
+            .addOnFailureListener { e ->
+                Log.e("FirestoreManager", "Failed to get user points", e)
+                callback(0)
             }
     }
 
 
+    //REWARDS
+    fun addReward(reward: Reward, callback: (Boolean) -> Unit) {
+        val db = FirebaseFirestore.getInstance()
+        val rewardRef = db.collection("rewards").document()
 
+        val rewardData = hashMapOf(
+            "id" to rewardRef.id,
+            "title" to reward.title,
+            "description" to reward.description,
+            "cost" to reward.cost,
+            "currency" to reward.currency,
+            "imageUrl" to reward.imageUrl,
+            "isActive" to reward.isActive
+        )
+
+        rewardRef.set(rewardData)
+            .addOnSuccessListener { callback(true) }
+            .addOnFailureListener { callback(false) }
+    }
+
+
+    fun getAvailableRewards(callback: (List<Reward>) -> Unit) {
+        FirebaseFirestore.getInstance().collection("rewards")
+            .whereEqualTo("isActive", true)
+            .get()
+            .addOnSuccessListener { result ->
+                val rewards = result.documents.mapNotNull { doc ->
+                    doc.toObject(Reward::class.java)?.copy(id = doc.id)
+                }
+                Log.d("FirestoreManager", "Available rewards fetched: ${rewards.size}")
+                callback(rewards)
+            }
+            .addOnFailureListener { e ->
+                Log.e("FirestoreManager", "Failed to fetch rewards: ${e.message}", e)
+                callback(emptyList())
+            }
+    }
+
+
+    fun claimReward(userId: String, reward: Reward, callback: (Boolean) -> Unit) {
+        val db = FirebaseFirestore.getInstance()
+        val pointsDocRef = db.collection("points").document(userId)
+        val claimedRewardsRef = db.collection("users")
+            .document(userId)
+            .collection("claimedRewards")
+
+        db.runTransaction { transaction ->
+            val pointsSnapshot = transaction.get(pointsDocRef)
+            val currentPoints = pointsSnapshot.getLong("honeyPoints") ?: 0
+
+            if (currentPoints < reward.cost) {
+                throw Exception("Not enough points to claim reward")
+            }
+
+            transaction.update(pointsDocRef, "honeyPoints", currentPoints - reward.cost)
+
+            val claimData = hashMapOf(
+                "rewardId" to reward.id,
+                "title" to reward.title,
+                "description" to reward.description,
+                "cost" to reward.cost,
+                "currency" to reward.currency,
+                "imageUrl" to reward.imageUrl,
+                "claimedAt" to com.google.firebase.Timestamp.now(),
+                "barcode" to UUID.randomUUID().toString().substring(0, 8)
+            )
+
+            val claimedDocRef = claimedRewardsRef.document()
+            transaction.set(claimedDocRef, claimData)
+        }.addOnSuccessListener {
+            Log.d("FirestoreManager", "Reward claimed successfully")
+            callback(true)
+        }.addOnFailureListener { e ->
+            Log.e("FirestoreManager", "Failed to claim reward", e)
+            callback(false)
+        }
+    }
+
+
+    fun getClaimedRewards(userId: String, callback: (List<Reward>) -> Unit) {
+        FirebaseFirestore.getInstance()
+            .collection("users").document(userId)
+            .collection("claimedRewards")
+            .orderBy("claimedAt", Query.Direction.DESCENDING)
+            .get()
+            .addOnSuccessListener { result ->
+                val rewards = result.documents.mapNotNull { doc ->
+                    val data = doc.data
+                    if (data != null) {
+                        Reward(
+                            id = doc.id,
+                            title = data["title"] as? String ?: "",
+                            description = data["description"] as? String ?: "",
+                            cost = (data["cost"] as? Long)?.toInt() ?: 0,
+                            currency = data["currency"] as? String ?: "honeyPoints",
+                            imageUrl = data["imageUrl"] as? String ?: "",
+                            isActive = true
+                        )
+                    } else null
+                }
+                callback(rewards)
+            }
+            .addOnFailureListener {
+                callback(emptyList())
+            }
+    }
 
 }
+
+
+
+
+
+
+
+
+
+
+
 

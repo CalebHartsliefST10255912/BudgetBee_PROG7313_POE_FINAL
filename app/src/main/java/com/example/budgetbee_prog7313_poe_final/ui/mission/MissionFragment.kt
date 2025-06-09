@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.budgetbee_prog7313_poe_final.R
+import com.example.budgetbee_prog7313_poe_final.firebase.FirestoreManager
 import com.google.firebase.auth.FirebaseAuth
 import com.example.budgetbee_prog7313_poe_final.ui.mission.MissionViewModel
 

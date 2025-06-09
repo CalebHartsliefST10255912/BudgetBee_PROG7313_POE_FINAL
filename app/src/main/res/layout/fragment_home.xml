@@ -91,6 +91,28 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
+    <Button
+        android:id="@+id/btnGoToRewards"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="View Rewards"
+        android:layout_marginTop="32dp"
+        android:layout_marginHorizontal="16dp"
+        app:layout_constraintTop_toBottomOf="@id/btnGoToMissions"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <Button
+        android:id="@+id/btnGoToMyRewards"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="View Your Rewards"
+        android:layout_marginTop="32dp"
+        android:layout_marginHorizontal="16dp"
+        app:layout_constraintTop_toBottomOf="@id/btnGoToRewards"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
     <!-- Logout button -->
     <Button
         android:id="@+id/logoutButton"
@@ -99,7 +121,7 @@
         android:text="Logout"
         android:layout_marginTop="96dp"
         android:layout_marginHorizontal="16dp"
-        app:layout_constraintTop_toBottomOf="@id/progressText"
+        app:layout_constraintTop_toBottomOf="@id/btnGoToMyRewards"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
