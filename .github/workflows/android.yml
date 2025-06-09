@@ -1,0 +1,53 @@
+name: Android CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2. Use JDK 17 (AGP 8.9.2+ requires Java 17 to run)
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      # 3. Cache Gradle
+      - name: Cache Gradle
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      # 4. Make the wrapper executable
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      # 5. Assemble Debug (with info & stacktrace so any future errors are easier to diagnose)
+      - name: Assemble Debug
+        run: ./gradlew :app:assembleDebug --no-daemon --info --stacktrace
+
+      # 6. Run lint
+      - name: Run lint
+        run: ./gradlew :app:lintDebug --no-daemon
+
+      # 7. Run unit tests
+      - name: Run unit tests
+        run: ./gradlew :app:testDebugUnitTest --no-daemon
+
