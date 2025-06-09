@@ -31,8 +31,6 @@ class GraphActivity : AppCompatActivity() {
     private var categories: List<String> = listOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        //remove top bar
-        supportActionBar?.hide()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_graph)
 
@@ -103,50 +101,24 @@ class GraphActivity : AppCompatActivity() {
             circleRadius = 4f
             setDrawFilled(true)
             lineWidth = 2f
-            color = getColor(R.color.purple_700)
-            fillColor = getColor(R.color.purple_200)
-            setDrawCircles(true)
-            setDrawValues(false)
         }
 
         chart.data = LineData(dataSet)
         chart.xAxis.valueFormatter = IndexAxisValueFormatter(labels)
         chart.xAxis.granularity = 1f
-
-        // Clean up old goal lines before drawing new ones
         chart.axisLeft.removeAllLimitLines()
 
-        // 🔑 Fetch goals from Firestore and add as horizontal lines
+        // Add goal lines
         val userId = auth.currentUser?.uid ?: return
-        val thisMonth = SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(Date())
-
         FirestoreManager.getGoal(userId) { goals ->
+            val thisMonth = SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(Date())
             val goal = goals.find { it.month == thisMonth }
-
             goal?.let {
-                val minGoalLine = LimitLine(it.minGoal.toFloat(), "Min Goal").apply {
-                    lineColor = getColor(R.color.teal_700)
-                    lineWidth = 2f
-                    enableDashedLine(10f, 10f, 0f)
-                    textColor = getColor(R.color.teal_700)
-                    textSize = 12f
-                }
-
-                val maxGoalLine = LimitLine(it.maxGoal.toFloat(), "Max Goal").apply {
-                    lineColor = getColor(R.color.red)
-                    lineWidth = 2f
-                    enableDashedLine(10f, 10f, 0f)
-                    textColor = getColor(R.color.red)
-                    textSize = 12f
-                }
-
-                chart.axisLeft.addLimitLine(minGoalLine)
-                chart.axisLeft.addLimitLine(maxGoalLine)
+                chart.axisLeft.addLimitLine(LimitLine(it.minGoal.toFloat(), "Min Goal"))
+                chart.axisLeft.addLimitLine(LimitLine(it.maxGoal.toFloat(), "Max Goal"))
             }
 
             chart.invalidate()
         }
     }
-
-
 }

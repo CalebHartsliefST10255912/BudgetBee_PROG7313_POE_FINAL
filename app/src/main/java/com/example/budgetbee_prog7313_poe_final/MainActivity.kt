@@ -17,7 +17,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Hide the Action Bar
-        //supportActionBar?.hide()
+        supportActionBar?.hide()
 
         super.onCreate(savedInstanceState)
 
@@ -42,6 +42,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.navigation_notifications
             )
         )
+        setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
     }
 }
