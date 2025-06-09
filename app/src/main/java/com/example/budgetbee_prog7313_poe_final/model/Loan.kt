@@ -6,20 +6,29 @@ data class Loan(
     val interestRate: Double = 0.0,            // Annual interest rate (%)
     val minRepayment: Double = 0.0,            // Minimum monthly repayment
     val amountPaid: Double = 0.0,              // Total already paid
-    val targetRepaymentMonths: Int = 36        // How many months user wants to repay in
+    val targetRepaymentMonths: Int = 1        // How many months user wants to repay in
 ) {
+    /**
+     * Now calculates:
+     *   Principal + (Principal * rate * months/12)
+     * minus whatever’s already paid.
+     */
     val remainingAmount: Double
-        get() = amount - amountPaid
+        get() {
+            // Convert annual % to a fraction:
+            val rateFraction = interestRate / 100.0
+            // Total interest over the full period:
+            val totalInterest = amount * rateFraction * (targetRepaymentMonths / 12.0)
+            // Gross amount owed:
+            val gross = amount + totalInterest
+            // Subtract what the user’s already paid:
+            return (gross - amountPaid).coerceAtLeast(0.0)
+        }
 
     val monthlyPayment: Double
         get() {
-            val monthlyInterest = interestRate / 12 / 100
-            return if (monthlyInterest == 0.0) {
-                (remainingAmount / targetRepaymentMonths).coerceAtLeast(minRepayment)
-            } else {
-                val numerator = monthlyInterest * remainingAmount
-                val denominator = 1 - Math.pow(1 + monthlyInterest, -targetRepaymentMonths.toDouble())
-                (numerator / denominator).coerceAtLeast(minRepayment)
-            }
+            val gross = amount + (amount * (interestRate / 100.0) * (targetRepaymentMonths / 12.0))
+            // Divide by months to get level payments, then ensure you meet the floor:
+            return (gross / targetRepaymentMonths).coerceAtLeast(minRepayment)
         }
 }

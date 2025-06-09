@@ -26,13 +26,23 @@ class LoanAdapter(
 
     override fun onBindViewHolder(holder: LoanViewHolder, position: Int) {
         val loan = loans[position]
-        holder.b.apply {
-            loanAmount.text = "Loan: R${"%.2f".format(loan.amount)}"
-            interestRate.text = "Interest: ${"%.2f".format(loan.interestRate)}%"
-            monthlyRepayment.text = "Monthly: R${"%.2f".format(loan.monthlyPayment)}"
-            remainingBalance.text = "Remaining: R${"%.2f".format(loan.remainingAmount)}"
 
-            editLoan.setOnClickListener { onEdit(loan) }
+        // Compute gross owed = principal + total interest
+        val rateFrac   = loan.interestRate / 100.0
+        val grossOwed  = loan.amount + (loan.amount * rateFrac * (loan.targetRepaymentMonths / 12.0))
+        // Percentage paid so far
+        val percentPaid = if (grossOwed > 0)
+            ((loan.amountPaid / grossOwed) * 100).toInt().coerceIn(0, 100)
+        else 0
+
+        holder.b.apply {
+            loanAmount.text        = "Loan: R${"%.2f".format(loan.amount)}"
+            interestRate.text      = "Interest: ${"%.2f".format(loan.interestRate)}%"
+            monthlyRepayment.text  = "Monthly: R${"%.2f".format(loan.monthlyPayment)}"
+            remainingBalance.text  = "Remaining: R${"%.2f".format(loan.remainingAmount)}"
+            loanProgress.progress  = percentPaid
+
+            editLoan.setOnClickListener   { onEdit(loan) }
             deleteLoan.setOnClickListener { onDelete(loan) }
         }
     }
