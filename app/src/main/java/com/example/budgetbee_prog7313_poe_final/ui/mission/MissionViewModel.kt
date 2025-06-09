@@ -11,6 +11,14 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/*
+* Code attribution
+* GeeksforGeeks. (2021). Java.lang.System.currentTimeMillis() Method with Examples. [online] Available at: https://www.geeksforgeeks.org/java-lang-system-currenttimemillis-method-with-examples/.
+
+‌
+*
+* */
+
 class MissionViewModel : ViewModel() {
     private val _missions = MutableLiveData<List<Mission>>()
     val missions: LiveData<List<Mission>> get() = _missions
@@ -42,7 +50,7 @@ class MissionViewModel : ViewModel() {
                     val claimedMissions = completed.toSet()
 
                     val now = Date()
-                    val waitMillis = 24 * 60 * 60 * 1000L
+                    val waitMillis = 24 * 60 * 60 * 1000L   //I used this to help with times (GeeksforGeeks, 2021)
                     val remainingTime = if (lastClaimTimestamp != null) {
                         waitMillis - (now.time - lastClaimTimestamp.time)
                     } else {
