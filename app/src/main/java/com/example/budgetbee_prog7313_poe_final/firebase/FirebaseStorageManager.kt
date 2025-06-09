@@ -56,3 +56,14 @@ class FirebaseStorageManager {
         }
     }
 }
+/*
+Firestore | Firebase (no date). https://firebase.google.com/docs/firestore.
+
+Add Firebase to your Android project  |  Firebase for Android (no date). https://firebase.google.com/docs/android/setup.
+
+Firebase Authentication (no date). https://firebase.google.com/docs/auth.
+
+Firestore | Firebase (no date). https://firebase.google.com/docs/firestore.
+
+Cloud storage for Firebase (no date). https://firebase.google.com/docs/storage.
+ */
