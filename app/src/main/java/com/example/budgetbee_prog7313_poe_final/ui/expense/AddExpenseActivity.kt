@@ -35,6 +35,9 @@ class AddExpenseActivity : AppCompatActivity() {
 
         supportActionBar?.hide()
 
+        // Hide the Action Bar
+        supportActionBar?.hide()
+
         FirebaseAuthManager.getCurrentUserId()?.let {
             userUid = it
         } ?: run {

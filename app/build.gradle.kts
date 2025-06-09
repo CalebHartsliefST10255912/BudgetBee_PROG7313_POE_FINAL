@@ -19,7 +19,6 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -46,16 +45,26 @@ android {
 }
 
 dependencies {
+    // Firebase BoM – versions are managed here
     implementation(platform("com.google.firebase:firebase-bom:33.0.0"))
+
+    // Core Firebase SDKs
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-storage-ktx")
 
-    // MPAndroidChart PhilJay (2019). PhilJay/MPAndroidChart. [online] GitHub. Available at: https://github.com/PhilJay/MPAndroidChart.
-    //
-    //‌
+    // ← App Check provider (debug for local/dev)
+    implementation("com.google.firebase:firebase-appcheck-debug")
+    // — OR for QA/prod, use Play Integrity instead:
+    // implementation("com.google.firebase:firebase-appcheck-playintegrity")
+    // — OR if you prefer SafetyNet:
+    // implementation("com.google.firebase:firebase-appcheck-safetynet")
+    // implementation("com.google.android.gms:play-services-safetynet")
+
+    // Charting
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
+    // Android X & other libs
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -67,8 +76,12 @@ dependencies {
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)
+
+    // Image loading
     implementation("com.github.bumptech.glide:glide:4.15.1")
     kapt("com.github.bumptech.glide:compiler:4.15.1")
+
+    // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
