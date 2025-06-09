@@ -86,10 +86,10 @@ Gamification missions and shop
 
 6\. 	Run it on your emulator
 
-| ![Screenshot 2025-06-09 202744](https://github.com/user-attachments/assets/a91dd00c-2877-46e3-af0b-c695dbf0c5ed) |
+![Screenshot 2025-06-09 202744](https://github.com/user-attachments/assets/a91dd00c-2877-46e3-af0b-c695dbf0c5ed)
 
-| :---- |
-| ![Screenshot 2025-06-09 202759](https://github.com/user-attachments/assets/3c093bc3-1b55-41bf-9cf4-b1ba5ffee0bb) |
+![Screenshot 2025-06-09 202759](https://github.com/user-attachments/assets/3c093bc3-1b55-41bf-9cf4-b1ba5ffee0bb)
+
 | **Workflow placement & triggers File:** .github/workflows/android.yml at the repo root **When it runs:** On every push to main On every pull\_request targeting main       (You can easily extend this to other branches or tags.) **Job environment Runner:** ubuntu-latest **Java:** Installs Temurin JDK 17 to satisfy Android Gradle Plugin 8.9.2’s requirement **Caching:** Preserves \~/.gradle/caches and \~/.gradle/wrapper between runs Speeds up dependency resolution and wrapper downloads **Key steps** Checkout code Set up JDK 17 Cache Gradle artifacts Make gradlew executable Assemble Debug APK Runs ./gradlew :app:assembleDebug \--info \--stacktrace Fails early if compilation or plugin-version mismatches occur Run Lint Executes ./gradlew :app:lintDebug to enforce Android best practices Run Unit Tests Executes ./gradlew :app:testDebugUnitTest to catch logic regressions **Purpose in the project Continuous Integration:** Every change is automatically built, linted, and tested—catching errors before they reach production. **Consistency:** Ensures everyone (and every PR) uses the same JDK, Gradle version, and build flags. **Speed:** Caching dependencies slashes CI runtime after the first run. **Quality gates:** Lint enforces coding standards and Android-specific rules (e.g. manifest permissions), while unit tests validate business logic. **Extendable:** You can layer on more jobs—instrumentation tests, release signing, Play Store deploys—without rewriting the core structure. By embedding this workflow, your BudgetBee project gains a reliable safety net and a faster developer feedback loop.  |
 
 Your own features as described in your design document. You must include at least two of your own features. Document your two features in a README file so you lecturer knows what to look out for.
