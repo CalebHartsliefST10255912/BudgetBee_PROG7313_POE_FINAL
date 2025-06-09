@@ -1,7 +1,7 @@
-// AddExpenseActivity.kt
 package com.example.budgetbee_prog7313_poe_final.ui.expense
 
 import android.app.Activity
+import android.app.DatePickerDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -27,6 +27,8 @@ class AddExpenseActivity : AppCompatActivity() {
     private var categoryId: String = ""
     private var categoryName: String = ""
 
+    private var selectedDate: String = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_expense)
@@ -37,6 +39,26 @@ class AddExpenseActivity : AppCompatActivity() {
             Toast.makeText(this, "User not logged in", Toast.LENGTH_SHORT).show()
             finish()
             return
+        }
+
+        // Initialize UI
+        val dateText = findViewById<TextView>(R.id.textSelectedDate)
+        dateText.text = "Selected Date: $selectedDate"
+
+        findViewById<Button>(R.id.buttonSelectDate).setOnClickListener {
+            val calendar = Calendar.getInstance()
+            val datePicker = DatePickerDialog(
+                this,
+                { _, year, month, day ->
+                    calendar.set(year, month, day)
+                    selectedDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(calendar.time)
+                    dateText.text = "Selected Date: $selectedDate"
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+            )
+            datePicker.show()
         }
 
         findViewById<Button>(R.id.buttonPickImage).setOnClickListener {
@@ -64,16 +86,11 @@ class AddExpenseActivity : AppCompatActivity() {
     private fun loadCategories() {
         FirestoreManager.getCategories(userUid) { cats ->
             if (cats.isEmpty()) {
-                // first‐time run: write the defaults, then try again
                 FirestoreManager.initializeDefaultCategories(userUid) { success ->
-                    if (success) {
-                        loadCategories()
-                    } else {
-                        Toast.makeText(this, "Failed to initialize categories", Toast.LENGTH_SHORT).show()
-                    }
+                    if (success) loadCategories()
+                    else Toast.makeText(this, "Failed to initialize categories", Toast.LENGTH_SHORT).show()
                 }
             } else {
-                // normal case: show them in the spinner
                 categoriesList = cats
                 setupSpinner()
             }
@@ -102,15 +119,13 @@ class AddExpenseActivity : AppCompatActivity() {
         val location    = findViewById<EditText>(R.id.inputExpenseLocation).text.toString()
         val startTime   = findViewById<EditText>(R.id.inputStartTime).text.toString()
         val endTime     = findViewById<EditText>(R.id.inputEndTime).text.toString()
-        val date        = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
 
-        // Build the Expense _without_ userUid
         val baseExpense = Expense(
             categoryId  = categoryId,
             category    = categoryName,
             name        = name,
             amount      = amount,
-            date        = date,
+            date        = selectedDate,
             startTime   = startTime,
             endTime     = endTime,
             description = description,
@@ -144,5 +159,4 @@ class AddExpenseActivity : AppCompatActivity() {
             post(baseExpense)
         }
     }
-
 }
