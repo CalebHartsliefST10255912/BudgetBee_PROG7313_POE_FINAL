@@ -14,11 +14,11 @@ This is our project for Part 3 of PROG7313. It's a budget tracker Android app. T
 
 ·        Caleb Hartslief – st10255912
 
-GitHub Repo: https://github.com/CalebHartsliefST10255912/BudgetBee\_PROG7313\_POE\_FINAL.git
+GitHub Repo: https://github.com/CalebHartsliefST10255912/BudgetBee_PROG7313_POE_FINAL.git
 
 Youtube link :
 
-https://youtu.be/fXsuRXzNz7k?si=QPnyiPFic9xx4GSU
+https://youtu.be/sbfFIdq-SVo?si=Eiri-rtJe8ENl5jN
 
 ## **What This Is (Part 3 — App Prototype Development )**
 
