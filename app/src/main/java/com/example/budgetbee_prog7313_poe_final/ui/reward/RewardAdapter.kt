@@ -1,5 +1,6 @@
 package com.example.budgetbee_prog7313_poe_final.ui.reward
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -7,6 +8,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.budgetbee_prog7313_poe_final.R
+import com.example.budgetbee_prog7313_poe_final.firebase.FirestoreManager
 import com.example.budgetbee_prog7313_poe_final.model.Reward
 
 class RewardAdapter(
@@ -34,6 +36,12 @@ class RewardAdapter(
         holder.title.text = reward.title
         holder.description.text = reward.description
         holder.cost.text = "Cost: ${reward.cost} ${reward.currency}"
+
+        FirestoreManager.getAvailableRewards { rewardList ->
+            Log.d("RewardScreen", "Number of rewards fetched: ${rewardList.size}")
+
+        }
+
 
         if (onClaim != null && reward.isActive && userPoints >= reward.cost) {
             holder.claimButton.isEnabled = true

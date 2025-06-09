@@ -1,5 +1,6 @@
 package com.example.budgetbee_prog7313_poe_final.ui.mission
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -39,6 +40,7 @@ class MissionAdapter(
         holder.points.text = "Reward: ${mission.points} points"
 
         val isClaimed = claimedMissions.contains(mission.id)
+
 
         if (mission.condition == "login") {
             holder.claimButton.text = "Checking..."

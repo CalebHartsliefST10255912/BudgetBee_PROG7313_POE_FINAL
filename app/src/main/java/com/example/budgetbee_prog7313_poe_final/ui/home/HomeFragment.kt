@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
@@ -15,6 +16,7 @@ import com.example.budgetbee_prog7313_poe_final.databinding.FragmentHomeBinding
 import com.example.budgetbee_prog7313_poe_final.firebase.FirebaseAuthManager
 import com.example.budgetbee_prog7313_poe_final.firebase.FirestoreManager
 import com.example.budgetbee_prog7313_poe_final.model.Goal
+import com.example.budgetbee_prog7313_poe_final.model.Reward
 import com.example.budgetbee_prog7313_poe_final.ui.goal.GoalsActivity
 import java.text.SimpleDateFormat
 import java.util.*
