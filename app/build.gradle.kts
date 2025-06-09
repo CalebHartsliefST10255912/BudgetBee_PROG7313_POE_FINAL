@@ -53,13 +53,8 @@ dependencies {
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-storage-ktx")
 
-    // ← App Check provider (debug for local/dev)
+    // Debug provider for dev:
     implementation("com.google.firebase:firebase-appcheck-debug")
-    // — OR for QA/prod, use Play Integrity instead:
-    // implementation("com.google.firebase:firebase-appcheck-playintegrity")
-    // — OR if you prefer SafetyNet:
-    // implementation("com.google.firebase:firebase-appcheck-safetynet")
-    // implementation("com.google.android.gms:play-services-safetynet")
 
     // Charting
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
