@@ -3,7 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="@color/bee_yellow">
 
     <TextView
         android:id="@+id/missionHeader"
@@ -12,10 +13,15 @@
         android:text="Today's Missions"
         android:textSize="20sp"
         android:textStyle="bold"
+        android:textColor="@color/black"
+        android:layout_gravity="center_horizontal"
         android:layout_marginBottom="10dp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/missionRecycler"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:paddingTop="8dp"
+        android:clipToPadding="false" />
 </LinearLayout>

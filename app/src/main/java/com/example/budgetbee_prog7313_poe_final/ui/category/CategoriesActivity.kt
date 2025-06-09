@@ -21,6 +21,8 @@ class CategoriesActivity : AppCompatActivity() {
     private var userUid: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Hide the Action Bar
+        supportActionBar?.hide()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.fragment_category)
 

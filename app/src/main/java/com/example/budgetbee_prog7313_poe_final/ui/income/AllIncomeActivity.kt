@@ -13,6 +13,8 @@ import com.example.budgetbee_prog7313_poe_final.firebase.FirestoreManager
 class AllIncomeActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Hide the Action Bar
+        supportActionBar?.hide()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_all_income)
 

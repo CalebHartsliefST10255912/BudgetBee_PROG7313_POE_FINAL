@@ -31,6 +31,8 @@ class GraphActivity : AppCompatActivity() {
     private var categories: List<String> = listOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Hide the Action Bar
+        supportActionBar?.hide()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_graph)
 
@@ -88,6 +90,9 @@ class GraphActivity : AppCompatActivity() {
         updateChart(filtered)
     }
 
+    //update the graph to plt all the neccessary points PhilJay (2019). PhilJay/MPAndroidChart. [online] GitHub. Available at: https://github.com/PhilJay/MPAndroidChart.
+    //
+    //‌
     private fun updateChart(expenses: List<Expense>) {
         val grouped = expenses.groupBy { it.date }
         val sortedDates = grouped.keys.sorted()
@@ -103,6 +108,7 @@ class GraphActivity : AppCompatActivity() {
             lineWidth = 2f
         }
 
+        //initialising
         chart.data = LineData(dataSet)
         chart.xAxis.valueFormatter = IndexAxisValueFormatter(labels)
         chart.xAxis.granularity = 1f

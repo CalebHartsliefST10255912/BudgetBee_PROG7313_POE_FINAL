@@ -18,6 +18,8 @@ class AddIncomeActivity : AppCompatActivity() {
     private var userUid: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Hide the Action Bar
+        supportActionBar?.hide()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_income)
 

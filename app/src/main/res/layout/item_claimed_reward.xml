@@ -3,8 +3,9 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="16dp"
-    android:orientation="vertical">
+    android:padding="24dp"
+    android:orientation="vertical"
+    android:background="@color/bee_yellow">
 
     <TextView
         android:id="@+id/rewardTitle"
@@ -12,25 +13,30 @@
         android:layout_height="wrap_content"
         android:text="Reward Title"
         android:textSize="18sp"
-        android:textStyle="bold"/>
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:layout_marginBottom="8dp" />
 
     <TextView
         android:id="@+id/rewardDescription"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Reward Description"/>
+        android:text="Reward Description"
+        android:textColor="@color/black"
+        android:layout_marginBottom="8dp" />
 
     <TextView
         android:id="@+id/rewardCost"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Cost: 100 honeyPoints"/>
+        android:text="Cost: 100 honeyPoints"
+        android:textColor="@color/black"
+        android:layout_marginBottom="12dp" />
 
     <ImageView
         android:id="@+id/barcodeImage"
         android:layout_width="match_parent"
         android:layout_height="100dp"
         android:src="@drawable/fake_barcode"
-        android:scaleType="fitCenter"
-        android:layout_marginTop="12dp"/>
+        android:scaleType="fitCenter" />
 </LinearLayout>
