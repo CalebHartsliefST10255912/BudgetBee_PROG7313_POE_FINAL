@@ -87,26 +87,6 @@
             android:padding="12dp"
             android:layout_marginBottom="12dp" />
 
-        <TextView
-            android:id="@+id/textSelectedDate"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Selected Date: Today"
-            android:textSize="16sp"
-            android:textColor="@color/black"
-            android:layout_marginBottom="8dp" />
-
-        <Button
-            android:id="@+id/buttonSelectDate"
-            android:text="Select Date"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minHeight="48dp"
-            android:textSize="16sp"
-            android:textColor="@color/white"
-            android:backgroundTint="@color/black"
-            android:layout_marginBottom="16dp" />
-
         <Button
             android:id="@+id/buttonPickImage"
             android:text="Choose Image (Optional)"

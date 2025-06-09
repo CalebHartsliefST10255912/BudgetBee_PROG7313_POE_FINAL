@@ -15,7 +15,7 @@ import com.example.budgetbee_prog7313_poe_final.firebase.FirestoreManager
 import com.example.budgetbee_prog7313_poe_final.model.Expense
 import com.example.budgetbee_prog7313_poe_final.ui.expense.ExpenseAdapter
 import com.example.budgetbee_prog7313_poe_final.ui.expense.ExpenseDetailActivity
-import com.example.budgetbee_prog7313_poe_final.ui.search.GraphActivity
+import com.example.budgetbee_prog7313_poe_final.ui.income.AddIncomeActivity
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -45,12 +45,13 @@ class SearchFragment : Fragment() {
         fromDateBtn = view.findViewById(R.id.fromDateButton)
         toDateBtn = view.findViewById(R.id.toDateButton)
         filterBtn = view.findViewById(R.id.applyFilterButton)
+
+
         recyclerView = view.findViewById(R.id.recyclerView)
         noItemsTextView = view.findViewById(R.id.noItemsTextView)
 
         setupRecyclerView()
         loadExpenses()
-
         fromDateBtn.setOnClickListener {
             showDatePicker { date ->
                 fromDate = date
@@ -69,7 +70,8 @@ class SearchFragment : Fragment() {
             filterItems()
         }
 
-        // Corrected button ID from viewGrapButton to viewGraphButton
+
+        // When the button is clicked, navigate to the AddIncomeActivity
         view.findViewById<Button>(R.id.viewGraphButton).setOnClickListener {
             startActivity(Intent(requireContext(), GraphActivity::class.java))
         }
@@ -79,7 +81,7 @@ class SearchFragment : Fragment() {
 
     private fun setupRecyclerView() {
         adapter = ExpenseAdapter { expense ->
-            val intent = Intent(requireContext(), ExpenseDetailActivity::class.java).apply {
+            val i = Intent(requireContext(), ExpenseDetailActivity::class.java).apply {
                 putExtra("name", expense.name)
                 putExtra("amount", expense.amount)
                 putExtra("date", expense.date)
@@ -90,7 +92,7 @@ class SearchFragment : Fragment() {
                 putExtra("endTime", expense.endTime)
                 putExtra("photoPath", expense.photoPath)
             }
-            startActivity(intent)
+            startActivity(i)
         }
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
@@ -112,6 +114,7 @@ class SearchFragment : Fragment() {
 
     private fun setupSpinners() {
         val categoryOptions = listOf("All") + allExpenses.map { it.category }.distinct()
+        val dateOptions = listOf("All", "Last 7 Days", "Last 30 Days", "This Month")
 
         categorySpinner.adapter = ArrayAdapter(
             requireContext(),
@@ -121,13 +124,15 @@ class SearchFragment : Fragment() {
             it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         }
 
-        categorySpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        val listener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 filterItems()
             }
 
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
+
+        categorySpinner.onItemSelectedListener = listener
     }
 
     private fun filterItems() {
@@ -159,10 +164,10 @@ class SearchFragment : Fragment() {
         noItemsTextView.visibility = if (filtered.isEmpty()) View.VISIBLE else View.GONE
     }
 
+
     private fun showDatePicker(onDateSelected: (Date) -> Unit) {
         val calendar = Calendar.getInstance()
-        DatePickerDialog(
-            requireContext(),
+        DatePickerDialog(requireContext(),
             { _, year, month, dayOfMonth ->
                 calendar.set(year, month, dayOfMonth)
                 onDateSelected(calendar.time)
@@ -172,4 +177,6 @@ class SearchFragment : Fragment() {
             calendar.get(Calendar.DAY_OF_MONTH)
         ).show()
     }
+
+
 }
