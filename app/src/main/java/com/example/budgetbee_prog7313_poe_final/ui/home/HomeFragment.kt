@@ -29,8 +29,6 @@ class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
-    private val monthKey: String by lazy {
-    // Must match FirestoreManager.saveGoal's month format
     private val monthKey by lazy {
         SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(Date())
     }
@@ -80,8 +78,19 @@ class HomeFragment : Fragment() {
         return binding.root
     }
 
+    private fun loadUserPoints() {
+        val userId = FirebaseAuthManager.getCurrentUserId() ?: return
+        FirestoreManager.getUserPoints(userId) { points ->
+            binding.pointsTextView.text = "Honey Points: $points"
+        }
+    }
+
+
     private fun loadAndDisplayGoals() {
         val userId = FirebaseAuthManager.getCurrentUserId() ?: return
+
+        loadUserPoints()
+
 
         FirestoreManager.getGoal(userId) { goals ->
             val thisMonthGoal = goals.find { it.month == monthKey }
@@ -130,4 +139,5 @@ class HomeFragment : Fragment() {
         super.onResume()
         loadAndDisplayGoals()
     }
+
 }

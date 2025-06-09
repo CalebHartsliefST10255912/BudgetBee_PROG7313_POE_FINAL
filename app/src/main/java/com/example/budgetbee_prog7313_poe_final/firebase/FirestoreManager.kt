@@ -249,6 +249,7 @@ object FirestoreManager {
     }
 
 
+
     //REWARDS
     fun addReward(reward: Reward, callback: (Boolean) -> Unit) {
         val db = FirebaseFirestore.getInstance()
