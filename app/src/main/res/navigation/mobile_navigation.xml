@@ -47,4 +47,20 @@
         android:label="Search"
         tools:layout="@layout/fragment_search" />
 
+    <fragment
+        android:id="@+id/missionsFragment"
+        android:name="com.example.budgetbee_prog7313_poe_final.ui.mission.MissionFragment"
+        android:label="Missions" />
+
+    <fragment
+        android:id="@+id/RewardFragment"
+        android:name="com.example.budgetbee_prog7313_poe_final.ui.reward.RewardsFragment"
+        android:label="Missions" />
+
+    <fragment
+        android:id="@+id/myRewardFragment"
+        android:name="com.example.budgetbee_prog7313_poe_final.ui.reward.MyRewardsFragment"
+        android:label="Missions" />
+
+
 </navigation>
