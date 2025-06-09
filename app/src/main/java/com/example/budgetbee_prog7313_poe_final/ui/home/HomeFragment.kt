@@ -29,7 +29,6 @@ class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
-    private val monthKey: String by lazy {
     // Must match FirestoreManager.saveGoal's month format
     private val monthKey by lazy {
         SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(Date())
@@ -126,6 +125,7 @@ class HomeFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+
     override fun onResume() {
         super.onResume()
         loadAndDisplayGoals()
