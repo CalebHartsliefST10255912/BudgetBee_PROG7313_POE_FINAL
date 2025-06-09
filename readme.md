@@ -120,7 +120,7 @@ Your own features as described in your design document. You must include at leas
 | ![][image20] | The search fragment users can search expenses and categories here can go to the graph  |
 | ![][image21] | Loan Page This is the page where the user can see all of their loans with the options to add a loan with the Add lon which will take you through that process of adding the loan. There are also options for the user to edit or delete their current loans. |
 | ![][image22] | This page is for people to add their loan details  After its added to db it will cal the repayment amount and how much you should pay back  The program may seem small but we were limited to 5 fragments in the nav bar  Loan wasnt in original  |
-
+there si also a details page ypu can acess if you press on an expense in view transactiions 
 Changes made based on feedback : 
 
 | ![][image23] | User can add photo now  |
