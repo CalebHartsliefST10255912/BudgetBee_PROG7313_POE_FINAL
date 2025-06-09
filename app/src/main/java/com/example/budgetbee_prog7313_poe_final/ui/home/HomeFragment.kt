@@ -20,21 +20,23 @@ import com.example.budgetbee_prog7313_poe_final.model.Reward
 import com.example.budgetbee_prog7313_poe_final.ui.goal.GoalsActivity
 import java.text.SimpleDateFormat
 import java.util.*
+import com.google.firebase.auth.FirebaseAuth
+
+import java.util.Date
+import java.util.Locale
 
 class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
-
-
     private val monthKey: String by lazy {
+    // Must match FirestoreManager.saveGoal's month format
+    private val monthKey by lazy {
         SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(Date())
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         val homeViewModel = ViewModelProvider(this).get(HomeViewModel::class.java)
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
@@ -55,9 +57,7 @@ class HomeFragment : Fragment() {
         }
 
         // Greeting
-        homeViewModel.text.observe(viewLifecycleOwner) {
-            binding.textHome.text = it
-        }
+        homeViewModel.text.observe(viewLifecycleOwner) { binding.textHome.text = it }
         homeViewModel.loadUserGreeting()
 
         // Logout
@@ -74,7 +74,7 @@ class HomeFragment : Fragment() {
             startActivity(Intent(requireContext(), GoalsActivity::class.java))
         }
 
-        // Load & display goals
+        // Load, then chain-fetch incomes & expenses
         loadAndDisplayGoals()
 
         return binding.root
@@ -83,49 +83,51 @@ class HomeFragment : Fragment() {
     private fun loadAndDisplayGoals() {
         val userId = FirebaseAuthManager.getCurrentUserId() ?: return
 
-        FirestoreManager.getGoal(userId) { goals: List<Goal> ->
-            // Find this month’s goal
+        FirestoreManager.getGoal(userId) { goals ->
             val thisMonthGoal = goals.find { it.month == monthKey }
-
             if (thisMonthGoal != null) {
                 val min = thisMonthGoal.minGoal
                 val max = thisMonthGoal.maxGoal
-
                 binding.minGoalText.text = "Min: R$min"
                 binding.maxGoalText.text = "Max: R$max"
 
-                // For demo: assume current halfway between
-                val current = (min + max) / 2.0
-                setupProgressBar(min, max, current)
+                // Fetch only expenses for the month
+                FirestoreManager.getExpenses(userId) { expenses ->
+                    // Sum up all expenses
+                    val totalExpenses = expenses.sumOf { it.amount }
+                    Log.d("HomeFragment", "Expenses total: $totalExpenses, min=$min, max=$max")
+
+                    // Compute percent of range
+                    val percent = when {
+                        totalExpenses <= min -> 0
+                        totalExpenses >= max -> 100
+                        else -> (((totalExpenses - min) / (max - min)) * 100).toInt()
+                    }
+
+                    // Update UI
+                    binding.goalProgressBar.max = 100
+                    binding.goalProgressBar.progress = percent
+                    binding.progressText.text = "$percent% of spending range"
+                }
             } else {
+                // No goal set yet
                 binding.minGoalText.text = "Min: –"
                 binding.maxGoalText.text = "Max: –"
                 binding.goalProgressBar.apply {
-                    max = 100
-                    progress = 0
+                    max = 100; progress = 0
                 }
                 binding.progressText.text = ""
             }
         }
     }
 
-    private fun setupProgressBar(min: Double, max: Double, current: Double) {
-        // percent is Int, never reassigns a val
-        val percent: Int = when {
-            current <= min -> 0
-            current >= max -> 100
-            else           -> (((current - min) / (max - min)) * 100).toInt()
-        }
-
-        binding.goalProgressBar.apply {
-            this.max = 100
-            this.progress = percent
-        }
-        binding.progressText.text = "$percent% of range"
-    }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+    override fun onResume() {
+        super.onResume()
+        loadAndDisplayGoals()
     }
 }

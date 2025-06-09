@@ -157,6 +157,13 @@ object FirestoreManager {
     // MISSIONS
     fun addMission(mission: Mission, onResult: (Boolean) -> Unit) {
         db.collection("missions").document(mission.id).set(mission)
+    }
+      
+    // LOANS
+    fun addLoan(userId: String, loan: Loan, onResult: (Boolean) -> Unit) {
+        val docRef = db.collection("users").document(userId).collection("loans").document()
+        val loanWithId = loan.copy(id = docRef.id)
+        docRef.set(loanWithId)
             .addOnSuccessListener { onResult(true) }
             .addOnFailureListener { onResult(false) }
     }
@@ -183,6 +190,19 @@ object FirestoreManager {
         val now = Timestamp.now()
         FirebaseFirestore.getInstance().collection("users").document(userId)
             .update("lastLoginMissionClaim", now)
+    }       
+            
+    fun getLoans(userId: String, onResult: (List<Loan>) -> Unit) {
+        db.collection("users").document(userId).collection("loans").get()
+            .addOnSuccessListener { snapshot ->
+                onResult(snapshot.toObjects(Loan::class.java))
+            }
+            .addOnFailureListener { onResult(emptyList()) }
+    }
+
+    fun deleteLoan(userId: String, loanId: String, onResult: (Boolean) -> Unit) {
+        db.collection("users").document(userId).collection("loans").document(loanId)
+            .delete()
             .addOnSuccessListener { onResult(true) }
             .addOnFailureListener { onResult(false) }
     }
@@ -333,7 +353,22 @@ object FirestoreManager {
             }
             .addOnFailureListener {
                 callback(emptyList())
-            }
+            }   
+    }
+    
+    // In FirestoreManager (firebase/FirestoreManager.kt)
+    fun updateLoan(userId: String, loan: Loan, onResult: (Boolean) -> Unit) {
+        if (loan.id.isBlank()) {
+            onResult(false) // no ID → can’t update
+            return
+        }
+        db.collection("users")
+            .document(userId)
+            .collection("loans")
+            .document(loan.id)
+            .set(loan)               // overwrite existing doc
+            .addOnSuccessListener  { onResult(true) }
+            .addOnFailureListener  { onResult(false) }
     }
 
 }

@@ -5,10 +5,10 @@
     <!-- Camera permissions -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera" android:required="true" />
-    
+
     <!-- Storage permissions -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" 
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
 
     <application
@@ -42,6 +42,9 @@
 
         <!-- Goals -->
         <activity android:name=".ui.goal.GoalsActivity" />
+
+        <!-- search -->
+        <activity android:name=".ui.search.GraphActivity" />
 
         <!-- Categories -->
         <activity android:name=".ui.category.CategoriesActivity"
