@@ -1,5 +1,6 @@
 package com.example.budgetbee_prog7313_poe_final.ui.search
 
+import android.app.DatePickerDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.*
@@ -14,6 +15,7 @@ import com.example.budgetbee_prog7313_poe_final.firebase.FirestoreManager
 import com.example.budgetbee_prog7313_poe_final.model.Expense
 import com.example.budgetbee_prog7313_poe_final.ui.expense.ExpenseAdapter
 import com.example.budgetbee_prog7313_poe_final.ui.expense.ExpenseDetailActivity
+import com.example.budgetbee_prog7313_poe_final.ui.income.AddIncomeActivity
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -21,13 +23,17 @@ import java.util.*
 class SearchFragment : Fragment() {
 
     private lateinit var categorySpinner: Spinner
-    private lateinit var dateSpinner: Spinner
+    private lateinit var fromDateBtn: Button
+    private lateinit var toDateBtn: Button
+    private lateinit var filterBtn: Button
     private lateinit var recyclerView: RecyclerView
     private lateinit var noItemsTextView: TextView
     private lateinit var adapter: ExpenseAdapter
 
     private val allExpenses = mutableListOf<Expense>()
     private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    private var fromDate: Date? = null
+    private var toDate: Date? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -35,13 +41,40 @@ class SearchFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_search, container, false)
 
-        categorySpinner = view.findViewById(R.id.categorySpinner)
-        dateSpinner = view.findViewById(R.id.dateSpinner)
+        categorySpinner = view.findViewById(R.id.categoryFilterSpinner)
+        fromDateBtn = view.findViewById(R.id.fromDateButton)
+        toDateBtn = view.findViewById(R.id.toDateButton)
+        filterBtn = view.findViewById(R.id.applyFilterButton)
+
+
         recyclerView = view.findViewById(R.id.recyclerView)
         noItemsTextView = view.findViewById(R.id.noItemsTextView)
 
         setupRecyclerView()
         loadExpenses()
+        fromDateBtn.setOnClickListener {
+            showDatePicker { date ->
+                fromDate = date
+                fromDateBtn.text = "From: ${dateFormat.format(date)}"
+            }
+        }
+
+        toDateBtn.setOnClickListener {
+            showDatePicker { date ->
+                toDate = date
+                toDateBtn.text = "To: ${dateFormat.format(date)}"
+            }
+        }
+
+        filterBtn.setOnClickListener {
+            filterItems()
+        }
+
+
+        // When the button is clicked, navigate to the AddIncomeActivity
+        view.findViewById<Button>(R.id.viewGraphButton).setOnClickListener {
+            startActivity(Intent(requireContext(), GraphActivity::class.java))
+        }
 
         return view
     }
@@ -91,14 +124,6 @@ class SearchFragment : Fragment() {
             it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         }
 
-        dateSpinner.adapter = ArrayAdapter(
-            requireContext(),
-            android.R.layout.simple_spinner_item,
-            dateOptions
-        ).also {
-            it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        }
-
         val listener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 filterItems()
@@ -108,14 +133,11 @@ class SearchFragment : Fragment() {
         }
 
         categorySpinner.onItemSelectedListener = listener
-        dateSpinner.onItemSelectedListener = listener
     }
 
     private fun filterItems() {
         val selectedCategory = categorySpinner.selectedItem?.toString() ?: "All"
-        val selectedDate = dateSpinner.selectedItem?.toString() ?: "All"
 
-        val now = Calendar.getInstance()
         val filtered = allExpenses.filter { expense ->
             val categoryMatch = selectedCategory == "All" || expense.category == selectedCategory
 
@@ -126,24 +148,12 @@ class SearchFragment : Fragment() {
             }
 
             val dateMatch = when {
-                selectedDate == "All" -> true
-                expenseDate == null -> false
-                selectedDate == "Last 7 Days" -> {
-                    val cal = Calendar.getInstance()
-                    cal.add(Calendar.DAY_OF_YEAR, -7)
-                    expenseDate.after(cal.time)
-                }
-                selectedDate == "Last 30 Days" -> {
-                    val cal = Calendar.getInstance()
-                    cal.add(Calendar.DAY_OF_YEAR, -30)
-                    expenseDate.after(cal.time)
-                }
-                selectedDate == "This Month" -> {
-                    val cal = Calendar.getInstance()
-                    val expCal = Calendar.getInstance().apply { time = expenseDate }
-                    cal.get(Calendar.MONTH) == expCal.get(Calendar.MONTH) &&
-                            cal.get(Calendar.YEAR) == expCal.get(Calendar.YEAR)
-                }
+                fromDate != null && toDate != null && expenseDate != null ->
+                    !expenseDate.before(fromDate) && !expenseDate.after(toDate)
+                fromDate != null && expenseDate != null ->
+                    !expenseDate.before(fromDate)
+                toDate != null && expenseDate != null ->
+                    !expenseDate.after(toDate)
                 else -> true
             }
 
@@ -153,4 +163,20 @@ class SearchFragment : Fragment() {
         adapter.submitList(filtered)
         noItemsTextView.visibility = if (filtered.isEmpty()) View.VISIBLE else View.GONE
     }
+
+
+    private fun showDatePicker(onDateSelected: (Date) -> Unit) {
+        val calendar = Calendar.getInstance()
+        DatePickerDialog(requireContext(),
+            { _, year, month, dayOfMonth ->
+                calendar.set(year, month, dayOfMonth)
+                onDateSelected(calendar.time)
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        ).show()
+    }
+
+
 }

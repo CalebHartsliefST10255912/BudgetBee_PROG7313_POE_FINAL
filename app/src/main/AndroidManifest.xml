@@ -43,6 +43,9 @@
         <!-- Goals -->
         <activity android:name=".ui.goal.GoalsActivity" />
 
+        <!-- search -->
+        <activity android:name=".ui.search.GraphActivity" />
+
         <!-- Categories -->
         <activity android:name=".ui.category.CategoriesActivity"
             android:exported="true" />
